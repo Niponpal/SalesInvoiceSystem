@@ -1,0 +1,100 @@
+﻿@model SalesInvoiceSystem.Models.Product
+
+@{
+    ViewData["Title"] = "Product Details";
+}
+
+<div class="container mt-4">
+
+    <div class="row justify-content-center">
+
+        <div class="col-md-7">
+
+            <div class="card shadow">
+
+                <div class="card-header">
+                    <h3 class="mb-0">Product Details</h3>
+                </div>
+
+                <div class="card-body">
+
+                    <dl class="row">
+
+                        <dt class="col-sm-4">
+                            Product ID
+                        </dt>
+
+                        <dd class="col-sm-8">
+                            @Model.Id
+                        </dd>
+
+
+                        <dt class="col-sm-4">
+                            Product Name
+                        </dt>
+
+                        <dd class="col-sm-8">
+                            @Model.ProductName
+                        </dd>
+
+
+                        <dt class="col-sm-4">
+                            Price
+                        </dt>
+
+                        <dd class="col-sm-8">
+                            @Model.Price.ToString("0.00")
+                        </dd>
+
+
+                        <dt class="col-sm-4">
+                            Stock
+                        </dt>
+
+                        <dd class="col-sm-8">
+                            @Model.Stock
+                        </dd>
+
+
+                        <dt class="col-sm-4">
+                            Created Date
+                        </dt>
+
+                        <dd class="col-sm-8">
+                            @Model.CreatedDate.ToString("dd-MM-yyyy hh:mm tt")
+                        </dd>
+
+                    </dl>
+
+                    <hr />
+
+                    <div class="d-flex gap-2">
+
+                        <a asp-action="Edit"
+                           asp-route-id="@Model.Id"
+                           class="btn btn-warning">
+                            Edit
+                        </a>
+
+                        <a asp-action="Delete"
+                           asp-route-id="@Model.Id"
+                           class="btn btn-danger">
+                            Delete
+                        </a>
+
+                        <a asp-action="Index"
+                           class="btn btn-secondary">
+                            Back
+                        </a>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
