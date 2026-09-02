@@ -4,7 +4,7 @@ namespace SalesInvoiceSystem.Models
 {
     public class SaleDetail
     {
-        public int SaleDetailId { get; set; }
+        public int Id { get; set; }
 
         public int SaleId { get; set; }
 
