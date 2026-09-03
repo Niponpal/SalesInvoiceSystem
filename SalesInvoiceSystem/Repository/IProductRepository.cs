@@ -27,10 +27,6 @@ public class ProductRepository : IProductRepository
         _factory = factory;
     }
 
-    // =========================================================
-    // CREATE PRODUCT
-    // =========================================================
-
     public async Task<Product> AddProductAsync(  Product product,  CancellationToken cancellationToken)
     {
         using var conn = _factory.CreateDbConnection();
@@ -50,10 +46,6 @@ public class ProductRepository : IProductRepository
         return await conn.QuerySingleAsync<Product>(command);
     }
 
-    // =========================================================
-    // GET ALL PRODUCTS
-    // =========================================================
-
     public async Task<IEnumerable<Product>> GetAllProductAsync( CancellationToken cancellationToken)
     {
         using var conn = _factory.CreateDbConnection();
@@ -66,9 +58,6 @@ public class ProductRepository : IProductRepository
         return await conn.QueryAsync<Product>(command);
     }
 
-    // =========================================================
-    // GET PRODUCT BY ID
-    // =========================================================
 
     public async Task<Product> GetProductByIdAsync(long id, CancellationToken cancellationToken)
     {
@@ -94,10 +83,6 @@ public class ProductRepository : IProductRepository
 
         return product;
     }
-
-    // =========================================================
-    // UPDATE PRODUCT
-    // =========================================================
 
     public async Task<Product> UpdateProductAsync( Product product, CancellationToken cancellationToken)
     {
@@ -128,15 +113,11 @@ public class ProductRepository : IProductRepository
         return result;
     }
 
-    // =========================================================
-    // DELETE PRODUCT
-    // =========================================================
-
     public async Task<Product> DeleteProductAsync( long id, CancellationToken cancellationToken)
     {
         using var conn = _factory.CreateDbConnection();
 
-        // First get product
+       
         var productParameters = new DynamicParameters();
         productParameters.Add("@Id", id);
 
@@ -155,7 +136,7 @@ public class ProductRepository : IProductRepository
                 $"Product with Id {id} not found.");
         }
 
-        // Delete product
+    
         var deleteParameters = new DynamicParameters();
         deleteParameters.Add("@Id", id);
 

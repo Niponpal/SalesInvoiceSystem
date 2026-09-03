@@ -7,21 +7,13 @@ namespace SalesInvoiceSystem.Repository
 {
     public interface ISaleDetailRepository
     {
-        Task<IEnumerable<SaleDetail>> GetBySaleIdAsync(
-            int saleId,
-            CancellationToken cancellationToken);
+        Task<IEnumerable<SaleDetail>> GetBySaleIdAsync( int saleId, CancellationToken cancellationToken);
 
-        Task<SaleDetail> AddSaleDetailAsync(
-            SaleDetail saleDetail,
-            CancellationToken cancellationToken);
+        Task<SaleDetail> AddSaleDetailAsync( SaleDetail saleDetail, CancellationToken cancellationToken);
 
-        Task<SaleDetail> GetSaleDetailByIdAsync(
-            int id,
-            CancellationToken cancellationToken);
+        Task<SaleDetail> GetSaleDetailByIdAsync(int id, CancellationToken cancellationToken);
 
-        Task<SaleDetail> DeleteSaleDetailAsync(
-            int id,
-            CancellationToken cancellationToken);
+        Task<SaleDetail> DeleteSaleDetailAsync(int id, CancellationToken cancellationToken);
     }
 
 
@@ -34,14 +26,7 @@ namespace SalesInvoiceSystem.Repository
             _factory = factory;
         }
 
-
-        // =====================================================
-        // GET SALE DETAILS BY SALE ID
-        // =====================================================
-
-        public async Task<IEnumerable<SaleDetail>> GetBySaleIdAsync(
-            int saleId,
-            CancellationToken cancellationToken)
+        public async Task<IEnumerable<SaleDetail>> GetBySaleIdAsync( int saleId, CancellationToken cancellationToken)
         {
             using var conn = _factory.CreateDbConnection();
 
@@ -59,10 +44,7 @@ namespace SalesInvoiceSystem.Repository
         }
 
 
-        // =====================================================
-        // GET SALE DETAIL BY ID
-        // =====================================================
-
+     
         public async Task<SaleDetail> GetSaleDetailByIdAsync(
             int id,
             CancellationToken cancellationToken)
@@ -93,13 +75,8 @@ namespace SalesInvoiceSystem.Repository
         }
 
 
-        // =====================================================
-        // CREATE SALE DETAIL
-        // =====================================================
 
-        public async Task<SaleDetail> AddSaleDetailAsync(
-            SaleDetail saleDetail,
-            CancellationToken cancellationToken)
+        public async Task<SaleDetail> AddSaleDetailAsync(SaleDetail saleDetail, CancellationToken cancellationToken)
         {
             using var conn = _factory.CreateDbConnection();
 
@@ -117,22 +94,14 @@ namespace SalesInvoiceSystem.Repository
                 commandType: CommandType.StoredProcedure,
                 cancellationToken: cancellationToken);
 
-            return await conn.QuerySingleAsync<SaleDetail>(
-                command);
+            return await conn.QuerySingleAsync<SaleDetail>( command);
         }
 
 
-        // =====================================================
-        // DELETE SALE DETAIL
-        // =====================================================
-
-        public async Task<SaleDetail> DeleteSaleDetailAsync(
-            int id,
-            CancellationToken cancellationToken)
+        public async Task<SaleDetail> DeleteSaleDetailAsync( int id, CancellationToken cancellationToken)
         {
             using var conn = _factory.CreateDbConnection();
 
-            // First get the record
             var getParameters = new DynamicParameters();
 
             getParameters.Add("@Id", id);
@@ -154,7 +123,6 @@ namespace SalesInvoiceSystem.Repository
             }
 
 
-            // Delete
             var deleteParameters = new DynamicParameters();
 
             deleteParameters.Add("@Id", id);
