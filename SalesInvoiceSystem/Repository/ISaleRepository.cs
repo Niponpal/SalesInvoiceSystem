@@ -36,8 +36,8 @@ public class SaleRepository : ISaleRepository
         var parameters = new DynamicParameters();
 
         parameters.Add("@InvoiceNo", sale.InvoiceNo.Trim());
-        parameters.Add("@CustomerId", sale.CustomerId);
         parameters.Add("@SaleDate", sale.SaleDate);
+        parameters.Add("@CustomerId", sale.CustomerId);
         parameters.Add("@TotalAmount", sale.TotalAmount);
 
         var command = new CommandDefinition(
