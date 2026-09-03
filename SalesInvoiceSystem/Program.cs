@@ -15,7 +15,9 @@ builder.Services.AddDbContext<ApplicationDbContext>(x => x.UseSqlServer( builder
 builder.Services.AddScoped<DbConnectionFactory>();
 
 // Product Repository
-builder.Services.AddScoped< IProductRepository, ProductRepository>();
+builder.Services.AddScoped<IProductRepository, ProductRepository>();
+
+builder.Services.AddScoped<ICustomerRepository, CustomerRepository>();
 
 var app = builder.Build();
 
