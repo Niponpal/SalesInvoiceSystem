@@ -23,6 +23,6 @@ namespace SalesInvoiceSystem.Models
         public DateTime CreatedDate { get; set; }
 
         // Navigation Property
-        public ICollection<Sale> Sales { get; set; }
+        public ICollection<Sale>? Sales { get; set; }
     }
 }

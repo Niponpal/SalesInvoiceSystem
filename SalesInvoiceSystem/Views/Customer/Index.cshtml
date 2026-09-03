@@ -1,0 +1,129 @@
+﻿@model IEnumerable<SalesInvoiceSystem.Models.Customer>
+
+@{
+    ViewData["Title"] = "Customers";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+
+    <h3>Customer List</h3>
+
+    <a asp-controller="Customer"
+       asp-action="CreateOrEdit"
+       class="btn btn-primary">
+        + Add Customer
+    </a>
+
+</div>
+
+
+@if (TempData["SuccessMessage"] != null)
+{
+    <div class="alert alert-success alert-dismissible fade show">
+
+        @TempData["SuccessMessage"]
+
+        <button type="button"
+                class="btn-close"
+                data-bs-dismiss="alert">
+        </button>
+
+    </div>
+}
+
+
+<div class="card">
+
+    <div class="card-body">
+
+        <div class="table-responsive">
+
+            <table class="table table-bordered table-striped">
+
+                <thead class="table-dark">
+
+                    <tr>
+                        <th>SL</th>
+                        <th>Customer Name</th>
+                        <th>Phone</th>
+                        <th>Email</th>
+                        <th>Address</th>
+                        <th>Created Date</th>
+                        <th>Actions</th>
+                    </tr>
+
+                </thead>
+
+                <tbody>
+
+                    @{
+                        int serial = 1;
+                    }
+
+                    @foreach (var item in Model)
+                    {
+                        <tr>
+
+                            <td>
+                                @serial
+                            </td>
+
+                            <td>
+                                @item.CustomerName
+                            </td>
+
+                            <td>
+                                @item.Phone
+                            </td>
+
+                            <td>
+                                @item.Email
+                            </td>
+
+                            <td>
+                                @item.Address
+                            </td>
+
+                            <td>
+                                @item.CreatedDate.ToString("dd-MM-yyyy")
+                            </td>
+
+                            <td>
+
+                                <a asp-controller="Customer"
+                                   asp-action="Details"
+                                   asp-route-id="@item.Id"
+                                   class="btn btn-sm btn-info">
+                                    Details
+                                </a>
+
+                                <a asp-controller="Customer"
+                                   asp-action="CreateOrEdit"
+                                   asp-route-id="@item.Id"
+                                   class="btn btn-sm btn-warning">
+                                    Edit
+                                </a>
+
+                                <a asp-controller="Customer"
+                                   asp-action="Delete"
+                                   asp-route-id="@item.Id"
+                                   class="btn btn-sm btn-danger">
+                                    Delete
+                                </a>
+
+                            </td>
+
+                        </tr>
+
+                        serial++;
+                    }
+
+                </tbody>
+
+            </table>
+
+        </div>
+
+    </div>
+
+</div>

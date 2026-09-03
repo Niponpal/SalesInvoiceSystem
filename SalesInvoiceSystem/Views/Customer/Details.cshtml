@@ -1,0 +1,93 @@
+﻿@model SalesInvoiceSystem.Models.Customer
+
+@{
+    ViewData["Title"] = "Customer Details";
+}
+
+<h3>Customer Details</h3>
+
+<hr />
+
+<div class="card">
+
+    <div class="card-body">
+
+        <dl class="row">
+
+            <dt class="col-sm-3">
+                Customer ID
+            </dt>
+
+            <dd class="col-sm-9">
+                @Model.Id
+            </dd>
+
+
+            <dt class="col-sm-3">
+                Customer Name
+            </dt>
+
+            <dd class="col-sm-9">
+                @Model.CustomerName
+            </dd>
+
+
+            <dt class="col-sm-3">
+                Phone
+            </dt>
+
+            <dd class="col-sm-9">
+                @Model.Phone
+            </dd>
+
+
+            <dt class="col-sm-3">
+                Email
+            </dt>
+
+            <dd class="col-sm-9">
+                @Model.Email
+            </dd>
+
+
+            <dt class="col-sm-3">
+                Address
+            </dt>
+
+            <dd class="col-sm-9">
+                @Model.Address
+            </dd>
+
+
+            <dt class="col-sm-3">
+                Created Date
+            </dt>
+
+            <dd class="col-sm-9">
+                @Model.CreatedDate.ToString(
+                "dd-MM-yyyy hh:mm tt")
+            </dd>
+
+        </dl>
+
+
+        <hr />
+
+
+        <a asp-controller="Customer"
+           asp-action="CreateOrEdit"
+           asp-route-id="@Model.Id"
+           class="btn btn-warning">
+            Edit
+        </a>
+
+
+        <a asp-controller="Customer"
+           asp-action="Index"
+           class="btn btn-secondary">
+            Back to List
+        </a>
+
+    </div>
+
+</div>

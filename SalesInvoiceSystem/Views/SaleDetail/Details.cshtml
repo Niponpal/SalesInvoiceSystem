@@ -1,0 +1,105 @@
+﻿@model SalesInvoiceSystem.Models.SaleDetail
+
+@{
+    ViewData["Title"] = "Sale Detail";
+}
+
+<div class="row">
+
+    <div class="col-md-8">
+
+        <div class="card">
+
+            <div class="card-header">
+
+                <h3 class="mb-0">
+                    Sale Detail
+                </h3>
+
+            </div>
+
+            <div class="card-body">
+
+                <dl class="row">
+
+                    <dt class="col-sm-4">
+                        ID
+                    </dt>
+
+                    <dd class="col-sm-8">
+                        @Model.Id
+                    </dd>
+
+
+                    <dt class="col-sm-4">
+                        Sale ID
+                    </dt>
+
+                    <dd class="col-sm-8">
+                        @Model.SaleId
+                    </dd>
+
+
+                    <dt class="col-sm-4">
+                        Product ID
+                    </dt>
+
+                    <dd class="col-sm-8">
+                        @Model.ProductId
+                    </dd>
+
+
+                    <dt class="col-sm-4">
+                        Quantity
+                    </dt>
+
+                    <dd class="col-sm-8">
+                        @Model.Quantity
+                    </dd>
+
+
+                    <dt class="col-sm-4">
+                        Unit Price
+                    </dt>
+
+                    <dd class="col-sm-8">
+                        @Model.UnitPrice.ToString("N2")
+                    </dd>
+
+
+                    <dt class="col-sm-4">
+                        Total Price
+                    </dt>
+
+                    <dd class="col-sm-8">
+                        @Model.TotalPrice.ToString("N2")
+                    </dd>
+
+                </dl>
+
+
+                <div class="mt-3">
+
+                    <a asp-controller="SaleDetail"
+                       asp-action="Delete"
+                       asp-route-id="@Model.Id"
+                       class="btn btn-danger">
+                        Delete
+                    </a>
+
+                    <a asp-controller="SaleDetail"
+                       asp-action="Index"
+                       asp-route-saleId="@Model.SaleId"
+                       class="btn btn-secondary">
+                        Back
+                    </a>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
