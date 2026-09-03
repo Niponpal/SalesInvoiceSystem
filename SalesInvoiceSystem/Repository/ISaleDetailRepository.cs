@@ -7,13 +7,20 @@ namespace SalesInvoiceSystem.Repository
 {
     public interface ISaleDetailRepository
     {
-        Task<IEnumerable<SaleDetail>> GetBySaleIdAsync( int saleId, CancellationToken cancellationToken);
+        Task<IEnumerable<Sale>> GetAllSaleAsync(
+            CancellationToken cancellationToken);
 
-        Task<SaleDetail> AddSaleDetailAsync( SaleDetail saleDetail, CancellationToken cancellationToken);
+        Task<Sale?> GetSaleByIdAsync(
+            int id,
+            CancellationToken cancellationToken);
 
-        Task<SaleDetail> GetSaleDetailByIdAsync(int id, CancellationToken cancellationToken);
+        Task<int> AddSaleAsync(
+            Sale sale,
+            CancellationToken cancellationToken);
 
-        Task<SaleDetail> DeleteSaleDetailAsync(int id, CancellationToken cancellationToken);
+        Task DeleteSaleAsync(
+            int id,
+            CancellationToken cancellationToken);
     }
 
 
@@ -26,26 +33,29 @@ namespace SalesInvoiceSystem.Repository
             _factory = factory;
         }
 
-        public async Task<IEnumerable<SaleDetail>> GetBySaleIdAsync( int saleId, CancellationToken cancellationToken)
+
+        // ==========================================
+        // GET ALL SALES
+        // ==========================================
+        public async Task<IEnumerable<Sale>> GetAllSaleAsync(
+            CancellationToken cancellationToken)
         {
             using var conn = _factory.CreateDbConnection();
 
-            var parameters = new DynamicParameters();
-
-            parameters.Add("@SaleId", saleId);
-
             var command = new CommandDefinition(
-                "sp_SaleDetail_GetBySaleId",
-                parameters,
+                "sp_Sale_GetAll",
                 commandType: CommandType.StoredProcedure,
-                cancellationToken: cancellationToken);
+                cancellationToken: cancellationToken
+            );
 
-            return await conn.QueryAsync<SaleDetail>(command);
+            return await conn.QueryAsync<Sale>(command);
         }
 
 
-     
-        public async Task<SaleDetail> GetSaleDetailByIdAsync(
+        // ==========================================
+        // GET SALE BY ID
+        // ==========================================
+        public async Task<Sale?> GetSaleByIdAsync(
             int id,
             CancellationToken cancellationToken)
         {
@@ -56,93 +66,166 @@ namespace SalesInvoiceSystem.Repository
             parameters.Add("@Id", id);
 
             var command = new CommandDefinition(
-                "sp_SaleDetail_GetById",
+                "sp_Sale_GetById",
                 parameters,
                 commandType: CommandType.StoredProcedure,
-                cancellationToken: cancellationToken);
+                cancellationToken: cancellationToken
+            );
 
-            var saleDetail =
-                await conn.QuerySingleOrDefaultAsync<SaleDetail>(
-                    command);
+            using var multi = await conn.QueryMultipleAsync(command);
 
-            if (saleDetail == null)
+
+            // First result = Sale
+            var sale =
+                await multi.ReadSingleOrDefaultAsync<Sale>();
+
+
+            // Second result = Sale Details
+            if (sale != null)
             {
-                throw new KeyNotFoundException(
-                    $"Sale detail with Id {id} not found.");
+                var details =
+                    await multi.ReadAsync<SaleDetail>();
+
+                sale.SaleDetails = details.ToList();
             }
 
-            return saleDetail;
+            return sale;
         }
 
 
+        // ==========================================
+        // ADD SALE / CREATE INVOICE
+        // ==========================================
+        public async Task<int> AddSaleAsync(
+            Sale sale,
+            CancellationToken cancellationToken)
+        {
+            using var conn = _factory.CreateDbConnection();
 
-        public async Task<SaleDetail> AddSaleDetailAsync(SaleDetail saleDetail, CancellationToken cancellationToken)
+
+            // ==========================================
+            // Create DataTable for TVP
+            // ==========================================
+
+            var table = new DataTable();
+
+            table.Columns.Add(
+                "ProductId",
+                typeof(int)
+            );
+
+            table.Columns.Add(
+                "Quantity",
+                typeof(int)
+            );
+
+            table.Columns.Add(
+                "UnitPrice",
+                typeof(decimal)
+            );
+
+            table.Columns.Add(
+                "TotalPrice",
+                typeof(decimal)
+            );
+
+
+            // ==========================================
+            // Add Sale Details into DataTable
+            // ==========================================
+
+            foreach (var detail in sale.SaleDetails)
+            {
+                table.Rows.Add(
+                    detail.ProductId,
+                    detail.Quantity,
+                    detail.UnitPrice,
+                    detail.Quantity * detail.UnitPrice
+                );
+            }
+
+
+            // ==========================================
+            // Parameters
+            // ==========================================
+
+            var parameters = new DynamicParameters();
+
+            parameters.Add(
+                "@InvoiceNo",
+                sale.InvoiceNo
+            );
+
+            parameters.Add(
+                "@CustomerId",
+                sale.CustomerId
+            );
+
+            parameters.Add(
+                "@SaleDate",
+                sale.SaleDate
+            );
+
+            parameters.Add(
+                "@TotalAmount",
+                sale.TotalAmount
+            );
+
+
+            // ==========================================
+            // TVP Parameter
+            // ==========================================
+
+            parameters.Add(
+                "@SaleDetails",
+                table.AsTableValuedParameter(
+                    "dbo.SaleDetailType"
+                )
+            );
+
+
+            // ==========================================
+            // Execute Stored Procedure
+            // ==========================================
+
+            var command = new CommandDefinition(
+                "sp_Sale_Create",
+                parameters,
+                commandType: CommandType.StoredProcedure,
+                cancellationToken: cancellationToken
+            );
+
+
+            return await conn.QuerySingleAsync<int>(command);
+        }
+
+
+        // ==========================================
+        // DELETE SALE
+        // ==========================================
+        public async Task DeleteSaleAsync(
+            int id,
+            CancellationToken cancellationToken)
         {
             using var conn = _factory.CreateDbConnection();
 
             var parameters = new DynamicParameters();
 
-            parameters.Add("@SaleId", saleDetail.SaleId);
-            parameters.Add("@ProductId", saleDetail.ProductId);
-            parameters.Add("@Quantity", saleDetail.Quantity);
-            parameters.Add("@UnitPrice", saleDetail.UnitPrice);
-            parameters.Add("@TotalPrice", saleDetail.TotalPrice);
+            parameters.Add(
+                "@Id",
+                id
+            );
+
 
             var command = new CommandDefinition(
-                "sp_SaleDetail_Create",
+                "sp_Sale_Delete",
                 parameters,
                 commandType: CommandType.StoredProcedure,
-                cancellationToken: cancellationToken);
-
-            return await conn.QuerySingleAsync<SaleDetail>( command);
-        }
+                cancellationToken: cancellationToken
+            );
 
 
-        public async Task<SaleDetail> DeleteSaleDetailAsync( int id, CancellationToken cancellationToken)
-        {
-            using var conn = _factory.CreateDbConnection();
-
-            var getParameters = new DynamicParameters();
-
-            getParameters.Add("@Id", id);
-
-            var getCommand = new CommandDefinition(
-                "sp_SaleDetail_GetById",
-                getParameters,
-                commandType: CommandType.StoredProcedure,
-                cancellationToken: cancellationToken);
-
-            var saleDetail =
-                await conn.QuerySingleOrDefaultAsync<SaleDetail>(
-                    getCommand);
-
-            if (saleDetail == null)
-            {
-                throw new KeyNotFoundException(
-                    $"Sale detail with Id {id} not found.");
-            }
-
-
-            var deleteParameters = new DynamicParameters();
-
-            deleteParameters.Add("@Id", id);
-
-            var deleteCommand = new CommandDefinition(
-                "sp_SaleDetail_Delete",
-                deleteParameters,
-                commandType: CommandType.StoredProcedure,
-                cancellationToken: cancellationToken);
-
-            var affectedRows =
-                await conn.ExecuteAsync(deleteCommand);
-
-            if (affectedRows == 0)
-            {
-                throw new Exception(
-                    $"Sale detail with Id {id} could not be deleted.");
-            }
-
-            return saleDetail;
+            await conn.ExecuteAsync(command);
         }
     }
 }

@@ -29,16 +29,81 @@ public class SaleRepository : ISaleRepository
     }
 
 
-    public async Task<Sale> AddSaleAsync(Sale sale,CancellationToken cancellationToken)
+    public async Task<Sale> AddSaleAsync(
+     Sale sale,
+     CancellationToken cancellationToken)
     {
         using var conn = _factory.CreateDbConnection();
 
         var parameters = new DynamicParameters();
 
-        parameters.Add("@InvoiceNo", sale.InvoiceNo.Trim());
-        parameters.Add("@SaleDate", sale.SaleDate);
-        parameters.Add("@CustomerId", sale.CustomerId);
-        parameters.Add("@TotalAmount", sale.TotalAmount);
+        parameters.Add(
+            "@InvoiceNo",
+            sale.InvoiceNo.Trim());
+
+        parameters.Add(
+            "@SaleDate",
+            sale.SaleDate);
+
+        parameters.Add(
+            "@CustomerId",
+            sale.CustomerId);
+
+        parameters.Add(
+            "@TotalAmount",
+            sale.TotalAmount);
+
+
+        // ==========================================
+        // CREATE SALE DETAIL DATATABLE
+        // ==========================================
+
+        var saleDetailsTable = new DataTable();
+
+        saleDetailsTable.Columns.Add(
+            "ProductId",
+            typeof(int));
+
+        saleDetailsTable.Columns.Add(
+            "Quantity",
+            typeof(int));
+
+        saleDetailsTable.Columns.Add(
+            "UnitPrice",
+            typeof(decimal));
+
+        saleDetailsTable.Columns.Add(
+            "TotalPrice",
+            typeof(decimal));
+
+
+        // ==========================================
+        // ADD SALE DETAILS
+        // ==========================================
+
+        foreach (var detail in sale.SaleDetails)
+        {
+            saleDetailsTable.Rows.Add(
+                detail.ProductId,
+                detail.Quantity,
+                detail.UnitPrice,
+                detail.TotalPrice);
+        }
+
+
+        // ==========================================
+        // ADD TVP PARAMETER
+        // ==========================================
+
+        parameters.Add(
+            "@SaleDetails",
+            saleDetailsTable.AsTableValuedParameter(
+                "dbo.SaleDetailType"));
+
+
+        // ==========================================
+        // EXECUTE STORED PROCEDURE
+        // ==========================================
 
         var command = new CommandDefinition(
             "sp_Sale_Create",
@@ -46,11 +111,13 @@ public class SaleRepository : ISaleRepository
             commandType: CommandType.StoredProcedure,
             cancellationToken: cancellationToken);
 
-        return await conn.QuerySingleAsync<Sale>(command);
+
+        var result =
+            await conn.QuerySingleAsync<Sale>(command);
+
+        return result;
     }
 
-
-  
     public async Task<IEnumerable<Sale>> GetAllSalesAsync( CancellationToken cancellationToken)
     {
         using var conn = _factory.CreateDbConnection();
