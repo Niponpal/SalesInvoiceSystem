@@ -1,0 +1,127 @@
+﻿@model IEnumerable<SalesInvoiceSystem.Models.SaleDetail>
+
+@{
+    ViewData["Title"] = "Sale Details";
+}
+
+<div class="container mt-4">
+
+    <div class="d-flex justify-content-between align-items-center mb-3">
+
+        <h3>Sale Details</h3>
+
+        <a asp-controller="Sale"
+           asp-action="Index"
+           class="btn btn-secondary">
+            Back to Sales
+        </a>
+
+    </div>
+
+
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="alert alert-success">
+            @TempData["SuccessMessage"]
+        </div>
+    }
+
+
+    @if (ViewBag.SaleId != null)
+    {
+        <div class="alert alert-info">
+            <strong>Sale ID:</strong> @ViewBag.SaleId
+        </div>
+    }
+
+
+    @if (Model != null && Model.Any())
+    {
+        <table class="table table-bordered table-striped">
+
+            <thead>
+                <tr>
+                    <th>SL</th>
+                    <th>Sale Detail ID</th>
+                    <th>Sale ID</th>
+                    <th>Product ID</th>
+                    <th>Quantity</th>
+                    <th>Unit Price</th>
+                    <th>Total Price</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+
+            <tbody>
+
+                @{
+                    int sl = 1;
+                }
+
+                @foreach (var item in Model)
+                {
+                    <tr>
+
+                        <td>
+                            @sl
+                        </td>
+
+                        <td>
+                            @item.Id
+                        </td>
+
+                        <td>
+                            @item.SaleId
+                        </td>
+
+                        <td>
+                            @item.ProductId
+                        </td>
+
+                        <td>
+                            @item.Quantity
+                        </td>
+
+                        <td>
+                            @item.UnitPrice.ToString("N2")
+                        </td>
+
+                        <td>
+                            @item.TotalPrice.ToString("N2")
+                        </td>
+
+                        <td>
+
+                            <a asp-controller="SaleDetail"
+                               asp-action="Details"
+                               asp-route-id="@item.Id"
+                               class="btn btn-info btn-sm">
+                                Details
+                            </a>
+
+                            <a asp-controller="SaleDetail"
+                               asp-action="Delete"
+                               asp-route-id="@item.Id"
+                               class="btn btn-danger btn-sm">
+                                Delete
+                            </a>
+
+                        </td>
+
+                    </tr>
+
+                    sl++;
+                }
+
+            </tbody>
+
+        </table>
+    }
+    else
+    {
+        <div class="alert alert-warning">
+            No sale details found.
+        </div>
+    }
+
+</div>

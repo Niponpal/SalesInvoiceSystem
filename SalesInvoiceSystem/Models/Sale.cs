@@ -20,9 +20,11 @@ namespace SalesInvoiceSystem.Models
 
         // Navigation Property
         [ForeignKey("CustomerId")]
-        public Customer Customer { get; set; }
+        public Customer? Customer { get; set; }
+
 
         public ICollection<SaleDetail> SaleDetails { get; set; }
-    
-}
+           = new List<SaleDetail>();
+
+    }
 }

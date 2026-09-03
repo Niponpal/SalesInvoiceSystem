@@ -1,0 +1,175 @@
+﻿@model SalesInvoiceSystem.Models.Sale
+
+@{
+    bool isEdit = Model.Id != 0;
+
+    ViewData["Title"] = isEdit
+        ? "Edit Sale"
+        : "Create Sale";
+}
+
+<div class="row">
+
+    <div class="col-md-8">
+
+        <div class="card">
+
+            <div class="card-header">
+
+                <h3>
+                    @(isEdit ? "Edit Sale" : "Create Sale")
+                </h3>
+
+            </div>
+
+            <div class="card-body">
+
+                <form asp-controller="Sale"
+                      asp-action="CreateOrEdit"
+                      method="post">
+
+                    @Html.AntiForgeryToken()
+
+                    <input type="hidden"
+                           asp-for="Id" />
+
+                    <div asp-validation-summary="ModelOnly"
+                         class="text-danger mb-3">
+                    </div>
+
+
+                    <!-- ===================================== -->
+                    <!-- INVOICE NUMBER -->
+                    <!-- ===================================== -->
+
+                    <div class="mb-3">
+
+                        <label asp-for="InvoiceNo"
+                               class="form-label">
+                            Invoice No
+                        </label>
+
+                        <input asp-for="InvoiceNo"
+                               class="form-control"
+                               readonly />
+
+                        <span asp-validation-for="InvoiceNo"
+                              class="text-danger">
+                        </span>
+
+                    </div>
+
+
+                    <!-- ===================================== -->
+                    <!-- CUSTOMER ID -->
+                    <!-- ===================================== -->
+
+                    <div class="mb-3">
+
+                        <label asp-for="CustomerId"
+                               class="form-label">
+                            Customer ID
+                        </label>
+
+                        <input asp-for="CustomerId"
+                               type="number"
+                               class="form-control"
+                               placeholder="Enter customer ID" />
+
+                        <span asp-validation-for="CustomerId"
+                              class="text-danger">
+                        </span>
+
+                    </div>
+
+
+                    <!-- ===================================== -->
+                    <!-- SALE DATE -->
+                    <!-- ===================================== -->
+
+                    <div class="mb-3">
+
+                        <label asp-for="SaleDate"
+                               class="form-label">
+                            Sale Date
+                        </label>
+
+                        <input asp-for="SaleDate"
+                               type="datetime-local"
+                               class="form-control" />
+
+                        <span asp-validation-for="SaleDate"
+                              class="text-danger">
+                        </span>
+
+                    </div>
+
+
+                    <!-- ===================================== -->
+                    <!-- TOTAL AMOUNT -->
+                    <!-- ===================================== -->
+
+                    <div class="mb-3">
+
+                        <label asp-for="TotalAmount"
+                               class="form-label">
+                            Total Amount
+                        </label>
+
+                        <input asp-for="TotalAmount"
+                               type="number"
+                               step="0.01"
+                               min="0"
+                               class="form-control"
+                               placeholder="0.00" />
+
+                        <span asp-validation-for="TotalAmount"
+                              class="text-danger">
+                        </span>
+
+                    </div>
+
+
+                    <!-- ===================================== -->
+                    <!-- BUTTONS -->
+                    <!-- ===================================== -->
+
+                    <div class="mt-4">
+
+                        <button type="submit"
+                                class="btn btn-success">
+
+                            @(isEdit
+                                                        ? "Update Sale"
+                                                        : "Create Sale")
+
+                        </button>
+
+                        <a asp-controller="Sale"
+                           asp-action="Index"
+                           class="btn btn-secondary">
+
+                            Back to List
+
+                        </a>
+
+                    </div>
+
+                </form>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+@section Scripts
+{
+    @{
+        await Html.RenderPartialAsync(
+            "_ValidationScriptsPartial");
+    }
+}
