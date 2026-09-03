@@ -12,8 +12,8 @@ using SalesInvoiceSystem.Data;
 namespace SalesInvoiceSystem.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20260902181443_InitialCreate")]
-    partial class InitialCreate
+    [Migration("20260902190406_ints")]
+    partial class ints
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -71,6 +71,7 @@ namespace SalesInvoiceSystem.Migrations
                         .HasColumnType("datetime2");
 
                     b.Property<decimal>("Price")
+                        .HasPrecision(18, 2)
                         .HasColumnType("decimal(18,2)");
 
                     b.Property<string>("ProductName")
@@ -106,6 +107,7 @@ namespace SalesInvoiceSystem.Migrations
                         .HasColumnType("datetime2");
 
                     b.Property<decimal>("TotalAmount")
+                        .HasPrecision(18, 2)
                         .HasColumnType("decimal(18,2)");
 
                     b.HasKey("Id");
@@ -133,9 +135,11 @@ namespace SalesInvoiceSystem.Migrations
                         .HasColumnType("int");
 
                     b.Property<decimal>("TotalPrice")
+                        .HasPrecision(18, 2)
                         .HasColumnType("decimal(18,2)");
 
                     b.Property<decimal>("UnitPrice")
+                        .HasPrecision(18, 2)
                         .HasColumnType("decimal(18,2)");
 
                     b.HasKey("Id");

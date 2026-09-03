@@ -21,6 +21,6 @@ namespace SalesInvoiceSystem.Models
         public DateTime CreatedDate { get; set; }
 
         // Navigation Property
-        public ICollection<SaleDetail> SaleDetails { get; set; }
+        public ICollection<SaleDetail> SaleDetails { get; set; } = new List<SaleDetail>();
     }
 }

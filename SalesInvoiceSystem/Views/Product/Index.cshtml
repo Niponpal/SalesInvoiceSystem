@@ -55,7 +55,7 @@
                         <thead class="table-dark">
 
                             <tr>
-                                <th>ID</th>
+                                <th>SL</th>
                                 <th>Product Name</th>
                                 <th>Price</th>
                                 <th>Stock</th>
@@ -69,12 +69,17 @@
 
                         <tbody>
 
+                            @{
+                                int serial = 1;
+                            }
+
                             @foreach (var item in Model)
                             {
                                 <tr>
 
+                                    <!-- Serial Number -->
                                     <td>
-                                        @item.Id
+                                        @serial
                                     </td>
 
                                     <td>
@@ -103,41 +108,42 @@
                                     </td>
 
                                     <td>
-                                        @item.CreatedDate.ToString(
-                                        "dd-MM-yyyy")
-                            </td>
+                                        @item.CreatedDate.ToString("dd-MM-yyyy")
+                                    </td>
 
-                            <td>
+                                    <td>
 
-                                <div class="d-flex gap-1">
+                                        <div class="d-flex gap-1">
 
-                                    <!-- Details -->
-                                    <a asp-action="Details"
-                                       asp-route-id="@item.Id"
-                                       class="btn btn-sm btn-info">
-                                        Details
-                                    </a>
+                                            <!-- Details -->
+                                            <a asp-action="Details"
+                                               asp-route-id="@item.Id"
+                                               class="btn btn-sm btn-info">
+                                                Details
+                                            </a>
 
-                                    <!-- Edit -->
-                                    <a asp-action="CreateOrEdit"
-                                       asp-route-id="@item.Id"
-                                       class="btn btn-sm btn-warning">
-                                        Edit
-                                    </a>
+                                            <!-- Edit -->
+                                            <a asp-action="CreateOrEdit"
+                                               asp-route-id="@item.Id"
+                                               class="btn btn-sm btn-warning">
+                                                Edit
+                                            </a>
 
-                                    <!-- Delete -->
-                                    <a asp-action="Delete"
-                                       asp-route-id="@item.Id"
-                                       class="btn btn-sm btn-danger">
-                                        Delete
-                                    </a>
+                                            <!-- Delete -->
+                                            <a asp-action="Delete"
+                                               asp-route-id="@item.Id"
+                                               class="btn btn-sm btn-danger">
+                                                Delete
+                                            </a>
 
-                                </div>
+                                        </div>
 
-                            </td>
+                                    </td>
 
-                        </tr>
-                                                }
+                                </tr>
+
+                                serial++;
+                            }
 
                         </tbody>
 

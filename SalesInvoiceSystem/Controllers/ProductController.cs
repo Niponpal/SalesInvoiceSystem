@@ -19,12 +19,9 @@ public class ProductController : Controller
     // =========================================================
 
     [HttpGet]
-    public async Task<IActionResult> Index(
-        CancellationToken cancellationToken)
+    public async Task<IActionResult> Index( CancellationToken cancellationToken)
     {
-        var products =
-            await _productRepository.GetAllProductAsync(
-                cancellationToken);
+        var products = await _productRepository.GetAllProductAsync(cancellationToken);
 
         return View(products);
     }
@@ -56,7 +53,7 @@ public class ProductController : Controller
     public async Task<IActionResult> CreateOrEdit(
         long? id,
         CancellationToken cancellationToken)
-    {
+   {
         // Create
         if (id == null || id == 0)
         {
@@ -127,32 +124,19 @@ public class ProductController : Controller
     // =========================================================
 
     [HttpGet]
-    public async Task<IActionResult> Delete(
-        long id,
-        CancellationToken cancellationToken)
+    public async Task<IActionResult> Delete( long id, CancellationToken cancellationToken)
     {
-        var product =
-            await _productRepository.GetProductByIdAsync(
-                id,
-                cancellationToken);
+        var product = await _productRepository
+            .GetProductByIdAsync(id, cancellationToken);
 
         return View(product);
     }
 
-
-    // =========================================================
-    // DELETE - POST
-    // =========================================================
-
     [HttpPost]
     [ValidateAntiForgeryToken]
-    public async Task<IActionResult> DeleteConfirmed(
-        long id,
-        CancellationToken cancellationToken)
+    public async Task<IActionResult> DeleteConfirmed(long id,CancellationToken cancellationToken)
     {
-        await _productRepository.DeleteProductAsync(
-            id,
-            cancellationToken);
+        await _productRepository.DeleteProductAsync( id,cancellationToken);
 
         TempData["SuccessMessage"] =
             "Product deleted successfully.";
