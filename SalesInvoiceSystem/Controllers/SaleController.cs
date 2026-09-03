@@ -2,155 +2,403 @@
 using SalesInvoiceSystem.Models;
 using SalesInvoiceSystem.Repository;
 
-namespace SalesInvoiceSystem.Controllers;
-
-public class SaleController : Controller
+namespace SalesInvoiceSystem.Controllers
 {
-    private readonly ISaleRepository _saleRepository;
-    private readonly IProductRepository _productRepository;
-    private readonly ICustomerRepository _customerRepository;
-
-    public SaleController(
-        ISaleRepository saleRepository,
-        IProductRepository productRepository,
-        ICustomerRepository customerRepository)
+    public class SaleController : Controller
     {
-        _saleRepository = saleRepository;
-        _productRepository = productRepository;
-        _customerRepository = customerRepository;
-    }
+        private readonly ISaleRepository _saleRepository;
+        private readonly IProductRepository _productRepository;
+        private readonly ICustomerRepository _customerRepository;
 
-    [HttpGet]
-    public async Task<IActionResult> Index( CancellationToken cancellationToken)
-    {
-        var sales = await _saleRepository.GetAllSalesAsync(cancellationToken);
-
-        return View(sales);
-    }
-
-    [HttpGet]
-    public async Task<IActionResult> Details( long id, CancellationToken cancellationToken)
-    {
-        if (id <= 0)
+        public SaleController(
+            ISaleRepository saleRepository,
+            IProductRepository productRepository,
+            ICustomerRepository customerRepository)
         {
-            return BadRequest("Invalid Sale Id.");
+            _saleRepository = saleRepository;
+            _productRepository = productRepository;
+            _customerRepository = customerRepository;
         }
 
-        var sale = await _saleRepository.GetSaleByIdAsync( id, cancellationToken);
 
-        return View(sale);
-    }
+        // ==========================================
+        // INDEX
+        // ==========================================
 
-    
-    [HttpGet]
-    public async Task<IActionResult> CreateOrEdit(
-        long? id,
-        CancellationToken cancellationToken)
-    {
-        
-        var products = await _productRepository.GetAllProductAsync(cancellationToken);
-
-        ViewBag.Products = products;
-
-
-       var customers = await _customerRepository.GetAllCustomerAsync(cancellationToken);
-
-        ViewBag.Customers = customers;
-
-        if (id == null || id == 0)
+        [HttpGet]
+        public async Task<IActionResult> Index(
+            CancellationToken cancellationToken)
         {
-            var sale = new Sale
+            var sales =
+                await _saleRepository.GetAllSalesAsync(
+                    cancellationToken);
+
+            return View(sales);
+        }
+
+
+        // ==========================================
+        // CREATE / EDIT GET
+        // ==========================================
+
+        [HttpGet]
+        public async Task<IActionResult> CreateOrEdit(
+            int? id,
+            CancellationToken cancellationToken)
+        {
+            await LoadDropdowns(cancellationToken);
+
+
+            // ==========================================
+            // EDIT
+            // ==========================================
+
+            if (id.HasValue && id.Value > 0)
             {
+                var sale =
+                    await _saleRepository.GetSaleByIdAsync(
+                        id.Value,
+                        cancellationToken);
+
+                if (sale == null)
+                {
+                    return NotFound();
+                }
+
+                return View(sale);
+            }
+
+
+            // ==========================================
+            // CREATE
+            // ==========================================
+
+            var newSale = new Sale
+            {
+                InvoiceNo =
+                    $"INV-{DateTime.Now:yyyyMMddHHmmss}",
+
                 SaleDate = DateTime.Now,
 
-                InvoiceNo =
-                    "INV-" +
-                    DateTime.Now.ToString("yyyyMMddHHmmss")
+                CustomerId = 0,
+
+                TotalAmount = 0,
+
+                SaleDetails =
+                    new List<SaleDetail>()
             };
 
+            return View(newSale);
+        }
+
+
+        // ==========================================
+        // CREATE / EDIT POST
+        // ==========================================
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> CreateOrEdit(
+            Sale sale,
+            CancellationToken cancellationToken)
+        {
+            await LoadDropdowns(cancellationToken);
+
+
+            // ==========================================
+            // INVOICE VALIDATION
+            // ==========================================
+
+            if (string.IsNullOrWhiteSpace(sale.InvoiceNo))
+            {
+                ModelState.AddModelError(
+                    nameof(sale.InvoiceNo),
+                    "Invoice number is required.");
+            }
+
+
+            // ==========================================
+            // CUSTOMER VALIDATION
+            // ==========================================
+
+            if (sale.CustomerId <= 0)
+            {
+                ModelState.AddModelError(
+                    nameof(sale.CustomerId),
+                    "Please select a customer.");
+            }
+
+
+            // ==========================================
+            // SALE DETAILS VALIDATION
+            // ==========================================
+
+            if (sale.SaleDetails == null ||
+                sale.SaleDetails.Count == 0)
+            {
+                ModelState.AddModelError(
+                    "",
+                    "Please add at least one product.");
+            }
+
+
+            // ==========================================
+            // PRODUCT VALIDATION
+            // ==========================================
+
+            if (sale.SaleDetails != null)
+            {
+                foreach (var detail in sale.SaleDetails)
+                {
+                    if (detail.ProductId <= 0)
+                    {
+                        ModelState.AddModelError(
+                            "",
+                            "Please select a valid product.");
+                    }
+
+                    if (detail.Quantity <= 0)
+                    {
+                        ModelState.AddModelError(
+                            "",
+                            "Quantity must be greater than 0.");
+                    }
+
+                    if (detail.UnitPrice <= 0)
+                    {
+                        ModelState.AddModelError(
+                            "",
+                            "Invalid product price.");
+                    }
+                }
+            }
+
+
+            // ==========================================
+            // STOP IF VALIDATION FAILED
+            // ==========================================
+
+            if (!ModelState.IsValid)
+            {
+                return View(sale);
+            }
+
+
+            // ==========================================
+            // CALCULATE DETAIL TOTAL
+            // ==========================================
+
+            foreach (var detail in sale.SaleDetails)
+            {
+                detail.TotalPrice =
+                    detail.Quantity *
+                    detail.UnitPrice;
+            }
+
+
+            // ==========================================
+            // CALCULATE GRAND TOTAL
+            // ==========================================
+
+            sale.TotalAmount =
+                sale.SaleDetails.Sum(
+                    x => x.TotalPrice);
+
+
+            // ==========================================
+            // CREATE
+            // ==========================================
+
+            if (sale.Id == 0)
+            {
+                try
+                {
+                    var createdSale =
+                        await _saleRepository.AddSaleAsync(
+                            sale,
+                            cancellationToken);
+
+
+                    TempData["SuccessMessage"] =
+                        "Invoice created successfully.";
+
+
+                    return RedirectToAction(
+                        nameof(Details),
+                        new
+                        {
+                            id = createdSale.Id
+                        });
+                }
+                catch (Exception ex)
+                {
+                    ModelState.AddModelError(
+                        "",
+                        ex.Message);
+
+                    return View(sale);
+                }
+            }
+
+
+            // ==========================================
+            // EDIT
+            // ==========================================
+
+            try
+            {
+                var updatedSale =
+                    await _saleRepository.UpdateSaleAsync(
+                        sale,
+                        cancellationToken);
+
+
+                TempData["SuccessMessage"] =
+                    "Invoice updated successfully.";
+
+
+                return RedirectToAction(
+                    nameof(Details),
+                    new
+                    {
+                        id = updatedSale.Id
+                    });
+            }
+            catch (Exception ex)
+            {
+                ModelState.AddModelError(
+                    "",
+                    ex.Message);
+
+                return View(sale);
+            }
+        }
+
+
+        // ==========================================
+        // DETAILS
+        // ==========================================
+
+        [HttpGet]
+        public async Task<IActionResult> Details(
+            int id,
+            CancellationToken cancellationToken)
+        {
+            if (id <= 0)
+            {
+                return BadRequest();
+            }
+
+
+            var sale =
+                await _saleRepository.GetSaleByIdAsync(
+                    id,
+                    cancellationToken);
+
+
+            if (sale == null)
+            {
+                return NotFound();
+            }
+
+
             return View(sale);
         }
 
 
-        var existingSale =
-            await _saleRepository.GetSaleByIdAsync(
-                id.Value,
-                cancellationToken);
+        // ==========================================
+        // DELETE GET
+        // ==========================================
 
-        return View(existingSale);
-    }
-
-    [HttpPost]
-    [ValidateAntiForgeryToken]
-    public async Task<IActionResult> CreateOrEdit( Sale sale, CancellationToken cancellationToken)
-    {
-       
-        if (!ModelState.IsValid)
+        [HttpGet]
+        public async Task<IActionResult> Delete(
+            int id,
+            CancellationToken cancellationToken)
         {
-            ViewBag.Products =  await _productRepository.GetAllProductAsync( cancellationToken);
+            if (id <= 0)
+            {
+                return BadRequest();
+            }
 
-            ViewBag.Customers =  await _customerRepository.GetAllCustomerAsync( cancellationToken);
+
+            var sale =
+                await _saleRepository.GetSaleByIdAsync(
+                    id,
+                    cancellationToken);
+
+
+            if (sale == null)
+            {
+                return NotFound();
+            }
+
 
             return View(sale);
         }
 
 
-   
-        if (sale.Id == 0)
+        // ==========================================
+        // DELETE POST
+        // ==========================================
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> DeleteConfirmed(
+            int id,
+            CancellationToken cancellationToken)
         {
-            sale.SaleDate = DateTime.Now;
+            if (id <= 0)
+            {
+                return BadRequest();
+            }
 
-            await _saleRepository.AddSaleAsync(
-                sale,
-                cancellationToken);
 
-            TempData["SuccessMessage"] =
-                "Sale created successfully.";
+            try
+            {
+                await _saleRepository.DeleteSaleAsync(
+                    id,
+                    cancellationToken);
+
+
+                TempData["SuccessMessage"] =
+                    "Invoice deleted successfully.";
+
+
+                return RedirectToAction(
+                    nameof(Index));
+            }
+            catch (Exception ex)
+            {
+                TempData["ErrorMessage"] =
+                    ex.Message;
+
+
+                return RedirectToAction(
+                    nameof(Index));
+            }
         }
 
 
-        else
+        // ==========================================
+        // LOAD DROPDOWNS
+        // ==========================================
+
+        private async Task LoadDropdowns(
+            CancellationToken cancellationToken)
         {
-            await _saleRepository.UpdateSaleAsync(
-                sale,
-                cancellationToken);
+            var products =
+                await _productRepository.GetAllProductAsync(
+                    cancellationToken);
 
-            TempData["SuccessMessage"] =
-                "Sale updated successfully.";
+
+            var customers =
+                await _customerRepository.GetAllCustomerAsync(
+                    cancellationToken);
+
+
+            ViewBag.Products = products;
+
+            ViewBag.Customers = customers;
         }
-
-        return RedirectToAction(nameof(Index));
-    }
-
- 
-    [HttpGet]
-    public async Task<IActionResult> Delete( long id,CancellationToken cancellationToken)
-    {
-        if (id <= 0)
-        {
-            return BadRequest("Invalid Sale Id.");
-        }
-
-        var sale =
-            await _saleRepository.GetSaleByIdAsync(
-                id,
-                cancellationToken);
-
-        return View(sale);
-    }
-
-    [HttpPost]
-    [ValidateAntiForgeryToken]
-    public async Task<IActionResult> DeleteConfirmed(long id, CancellationToken cancellationToken)
-    {
-        if (id <= 0)
-        {
-            return BadRequest("Invalid Sale Id.");
-        }
-
-        await _saleRepository.DeleteSaleAsync(id, cancellationToken);
-
-        TempData["SuccessMessage"] = "Sale deleted successfully.";
-        return RedirectToAction(nameof(Index));
     }
 }

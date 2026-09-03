@@ -4,114 +4,142 @@
     ViewData["Title"] = "Sales";
 }
 
-<div class="d-flex justify-content-between align-items-center mb-3">
-    <h3>Sales List</h3>
+<div class="container mt-4">
 
-    <a asp-controller="Sale"
-       asp-action="CreateOrEdit"
-       class="btn btn-primary">
-        + Create Sale
-    </a>
-</div>
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h3>Sales / Invoices</h3>
 
-@if (TempData["SuccessMessage"] != null)
-{
-    <div class="alert alert-success alert-dismissible fade show">
-        @TempData["SuccessMessage"]
-
-        <button type="button"
-                class="btn-close"
-                data-bs-dismiss="alert">
-        </button>
+        <a asp-controller="Sale"
+           asp-action="CreateOrEdit"
+           class="btn btn-primary">
+            <i class="bi bi-plus-circle"></i>
+            Create Invoice
+        </a>
     </div>
-}
 
-<div class="card">
-    <div class="card-body">
 
-        <div class="table-responsive">
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show">
+            @TempData["SuccessMessage"]
 
-            <table class="table table-bordered table-striped">
+            <button type="button"
+                    class="btn-close"
+                    data-bs-dismiss="alert">
+            </button>
+        </div>
+    }
 
-                <thead class="table-dark">
 
-                    <tr>
-                        <th>SL</th>
-                        <th>Invoice No</th>
-                        <th>Customer ID</th>
-                        <th>Sale Date</th>
-                        <th>Total Amount</th>
-                        <th>Actions</th>
-                    </tr>
+    @if (TempData["ErrorMessage"] != null)
+    {
+        <div class="alert alert-danger alert-dismissible fade show">
+            @TempData["ErrorMessage"]
 
-                </thead>
+            <button type="button"
+                    class="btn-close"
+                    data-bs-dismiss="alert">
+            </button>
+        </div>
+    }
 
-                <tbody>
 
-                    @{
-                        int serial = 1;
-                    }
+    <div class="card shadow-sm">
 
-                    @foreach (var item in Model)
-                    {
+        <div class="card-body">
+
+            <div class="table-responsive">
+
+                <table class="table table-bordered table-hover align-middle">
+
+                    <thead class="table-dark">
+
                         <tr>
-
-                            <td>
-                                @serial
-                            </td>
-
-                            <td>
-                                @item.InvoiceNo
-                            </td>
-
-                            <td>
-                                @item.CustomerId
-                            </td>
-
-                            <td>
-                                @item.SaleDate.ToString("dd-MM-yyyy hh:mm tt")
-                            </td>
-
-                            <td>
-                                @item.TotalAmount.ToString("N2")
-                            </td>
-
-                            <td>
-
-                                <a asp-controller="Sale"
-                                   asp-action="Details"
-                                   asp-route-id="@item.Id"
-                                   class="btn btn-sm btn-info">
-                                    Details
-                                </a>
-
-                                <a asp-controller="Sale"
-                                   asp-action="CreateOrEdit"
-                                   asp-route-id="@item.Id"
-                                   class="btn btn-sm btn-warning">
-                                    Edit
-                                </a>
-
-                                <a asp-controller="Sale"
-                                   asp-action="Delete"
-                                   asp-route-id="@item.Id"
-                                   class="btn btn-sm btn-danger">
-                                    Delete
-                                </a>
-
-                            </td>
-
+                            <th>#</th>
+                            <th>Invoice No</th>
+                            <th>Customer</th>
+                            <th>Sale Date</th>
+                            <th class="text-end">Total Amount</th>
+                            <th style="width: 220px;">Action</th>
                         </tr>
 
-                        serial++;
-                    }
+                    </thead>
 
-                </tbody>
+                    <tbody>
 
-            </table>
+                        @if (Model != null && Model.Any())
+                        {
+                            int count = 1;
+
+                            foreach (var sale in Model)
+                            {
+                                <tr>
+
+                                    <td>@count</td>
+
+                                    <td>
+                                        <strong>
+                                            @sale.InvoiceNo
+                                        </strong>
+                                    </td>
+
+                                    <td>
+                                        @sale.Customer
+                                    </td>
+
+                                    <td>
+                                        @sale.SaleDate.ToString("dd MMM yyyy hh:mm tt")
+                                    </td>
+
+                                    <td class="text-end">
+                                        @sale.TotalAmount.ToString("N2")
+                                    </td>
+
+                                    <td>
+
+                                        <a asp-action="Details"
+                                           asp-route-id="@sale.Id"
+                                           class="btn btn-sm btn-info">
+                                            Details
+                                        </a>
+
+                                        <a asp-action="CreateOrEdit"
+                                           asp-route-id="@sale.Id"
+                                           class="btn btn-sm btn-warning">
+                                            Edit
+                                        </a>
+
+                                        <a asp-action="Delete"
+                                           asp-route-id="@sale.Id"
+                                           class="btn btn-sm btn-danger">
+                                            Delete
+                                        </a>
+
+                                    </td>
+
+                                </tr>
+
+                                count++;
+                            }
+                        }
+                        else
+                        {
+                            <tr>
+                                <td colspan="6"
+                                    class="text-center text-muted py-4">
+                                    No sales found.
+                                </td>
+                            </tr>
+                        }
+
+                    </tbody>
+
+                </table>
+
+            </div>
 
         </div>
 
     </div>
-</div>
 
+</div>
