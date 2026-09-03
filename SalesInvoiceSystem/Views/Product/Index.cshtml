@@ -1,0 +1,171 @@
+﻿@model IEnumerable<SalesInvoiceSystem.Models.Product>
+
+@{
+    ViewData["Title"] = "Products";
+}
+
+<div class="container mt-4">
+
+    <!-- Header -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+
+        <div>
+            <h2>Product List</h2>
+            <p class="text-muted mb-0">
+                Manage your products
+            </p>
+        </div>
+
+        <a asp-action="CreateOrEdit"
+           class="btn btn-primary">
+            + Add Product
+        </a>
+
+    </div>
+
+
+    <!-- Success Message -->
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show"
+             role="alert">
+
+            @TempData["SuccessMessage"]
+
+            <button type="button"
+                    class="btn-close"
+                    data-bs-dismiss="alert">
+            </button>
+
+        </div>
+    }
+
+
+    <!-- Product Table -->
+    <div class="card shadow">
+
+        <div class="card-body">
+
+            @if (Model != null && Model.Any())
+            {
+                <div class="table-responsive">
+
+                    <table class="table table-bordered table-hover align-middle">
+
+                        <thead class="table-dark">
+
+                            <tr>
+                                <th>ID</th>
+                                <th>Product Name</th>
+                                <th>Price</th>
+                                <th>Stock</th>
+                                <th>Created Date</th>
+                                <th style="width: 250px;">
+                                    Actions
+                                </th>
+                            </tr>
+
+                        </thead>
+
+                        <tbody>
+
+                            @foreach (var item in Model)
+                            {
+                                <tr>
+
+                                    <td>
+                                        @item.Id
+                                    </td>
+
+                                    <td>
+                                        <strong>
+                                            @item.ProductName
+                                        </strong>
+                                    </td>
+
+                                    <td>
+                                        @item.Price.ToString("0.00")
+                                    </td>
+
+                                    <td>
+                                        @if (item.Stock > 0)
+                                        {
+                                            <span class="badge bg-success">
+                                                @item.Stock
+                                            </span>
+                                        }
+                                        else
+                                        {
+                                            <span class="badge bg-danger">
+                                                Out of Stock
+                                            </span>
+                                        }
+                                    </td>
+
+                                    <td>
+                                        @item.CreatedDate.ToString(
+                                        "dd-MM-yyyy")
+                            </td>
+
+                            <td>
+
+                                <div class="d-flex gap-1">
+
+                                    <!-- Details -->
+                                    <a asp-action="Details"
+                                       asp-route-id="@item.Id"
+                                       class="btn btn-sm btn-info">
+                                        Details
+                                    </a>
+
+                                    <!-- Edit -->
+                                    <a asp-action="CreateOrEdit"
+                                       asp-route-id="@item.Id"
+                                       class="btn btn-sm btn-warning">
+                                        Edit
+                                    </a>
+
+                                    <!-- Delete -->
+                                    <a asp-action="Delete"
+                                       asp-route-id="@item.Id"
+                                       class="btn btn-sm btn-danger">
+                                        Delete
+                                    </a>
+
+                                </div>
+
+                            </td>
+
+                        </tr>
+                                                }
+
+                        </tbody>
+
+                    </table>
+
+                </div>
+            }
+            else
+            {
+                <!-- No Product -->
+                <div class="text-center py-5">
+
+                    <h4>No Products Found</h4>
+
+                    <p class="text-muted">
+                        There are no products available.
+                    </p>
+
+                    <a asp-action="CreateOrEdit"
+                       class="btn btn-primary">
+                        Add Your First Product
+                    </a>
+
+                </div>
+            }
+
+        </div>
+
+    </div>
+
+</div>
