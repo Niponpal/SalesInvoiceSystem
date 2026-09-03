@@ -13,11 +13,6 @@ public class CustomerController : Controller
         _customerRepository = customerRepository;
     }
 
-
-    // =========================================================
-    // CUSTOMER LIST
-    // =========================================================
-
     [HttpGet]
     public async Task<IActionResult> Index(CancellationToken cancellationToken)
     {
@@ -27,9 +22,6 @@ public class CustomerController : Controller
     }
 
 
-    // =========================================================
-    // CUSTOMER DETAILS
-    // =========================================================
 
     [HttpGet]
     public async Task<IActionResult> Details(
@@ -44,41 +36,24 @@ public class CustomerController : Controller
         return View(customer);
     }
 
-
-    // =========================================================
-    // CREATE OR EDIT - GET
-    // =========================================================
-
     [HttpGet]
     public async Task<IActionResult> CreateOrEdit(
         long? id,
         CancellationToken cancellationToken)
     {
-        // Create
+      
         if (id == null || id == 0)
         {
             return View(new Customer());
         }
 
-        // Edit
-        var customer =
-            await _customerRepository.GetCustomerByIdAsync(
-                id.Value,
-                cancellationToken);
-
+        var customer = await _customerRepository.GetCustomerByIdAsync( id.Value, cancellationToken);
         return View(customer);
     }
 
-
-    // =========================================================
-    // CREATE OR EDIT - POST
-    // =========================================================
-
     [HttpPost]
     [ValidateAntiForgeryToken]
-    public async Task<IActionResult> CreateOrEdit(
-        Customer customer,
-        CancellationToken cancellationToken)
+    public async Task<IActionResult> CreateOrEdit(Customer customer, CancellationToken cancellationToken)
     {
         if (!ModelState.IsValid)
         {
@@ -86,62 +61,36 @@ public class CustomerController : Controller
         }
 
 
-        // =====================================================
-        // CREATE
-        // =====================================================
-
         if (customer.Id == 0)
         {
             customer.CreatedDate = DateTime.Now;
 
-            await _customerRepository.AddCustomerAsync(
-                customer,
-                cancellationToken);
+            await _customerRepository.AddCustomerAsync( customer, cancellationToken);
 
-            TempData["SuccessMessage"] =
-                "Customer created successfully.";
+            TempData["SuccessMessage"] = "Customer created successfully.";
         }
 
 
-        // =====================================================
-        // UPDATE
-        // =====================================================
 
         else
         {
-            await _customerRepository.UpdateCustomerAsync(
-                customer,
-                cancellationToken);
+            await _customerRepository.UpdateCustomerAsync( customer, cancellationToken);
 
-            TempData["SuccessMessage"] =
-                "Customer updated successfully.";
+            TempData["SuccessMessage"] =  "Customer updated successfully.";
         }
 
         return RedirectToAction(nameof(Index));
     }
 
 
-    // =========================================================
-    // DELETE - GET
-    // =========================================================
-
     [HttpGet]
-    public async Task<IActionResult> Delete(
-        long id,
-        CancellationToken cancellationToken)
+    public async Task<IActionResult> Delete( long id, CancellationToken cancellationToken)
     {
-        var customer =
-            await _customerRepository.GetCustomerByIdAsync(
-                id,
-                cancellationToken);
+        var customer = await _customerRepository.GetCustomerByIdAsync(id, cancellationToken);
 
         return View(customer);
     }
 
-
-    // =========================================================
-    // DELETE - POST
-    // =========================================================
 
     [HttpPost]
     [ValidateAntiForgeryToken]

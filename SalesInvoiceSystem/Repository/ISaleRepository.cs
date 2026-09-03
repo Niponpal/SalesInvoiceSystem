@@ -7,24 +7,15 @@ namespace SalesInvoiceSystem.Repository;
 
 public interface ISaleRepository
 {
-    Task<IEnumerable<Sale>> GetAllSalesAsync(
-        CancellationToken cancellationToken);
+    Task<IEnumerable<Sale>> GetAllSalesAsync(CancellationToken cancellationToken);
 
-    Task<Sale> GetSaleByIdAsync(
-        long id,
-        CancellationToken cancellationToken);
+    Task<Sale> GetSaleByIdAsync( long id,CancellationToken cancellationToken);
 
-    Task<Sale> AddSaleAsync(
-        Sale sale,
-        CancellationToken cancellationToken);
+    Task<Sale> AddSaleAsync( Sale sale, CancellationToken cancellationToken);
 
-    Task<Sale> UpdateSaleAsync(
-        Sale sale,
-        CancellationToken cancellationToken);
+    Task<Sale> UpdateSaleAsync( Sale sale, CancellationToken cancellationToken);
 
-    Task<Sale> DeleteSaleAsync(
-        long id,
-        CancellationToken cancellationToken);
+    Task<Sale> DeleteSaleAsync( long id, CancellationToken cancellationToken);
 }
 
 
@@ -38,13 +29,7 @@ public class SaleRepository : ISaleRepository
     }
 
 
-    // =========================================================
-    // CREATE SALE
-    // =========================================================
-
-    public async Task<Sale> AddSaleAsync(
-        Sale sale,
-        CancellationToken cancellationToken)
+    public async Task<Sale> AddSaleAsync(Sale sale,CancellationToken cancellationToken)
     {
         using var conn = _factory.CreateDbConnection();
 
@@ -65,12 +50,8 @@ public class SaleRepository : ISaleRepository
     }
 
 
-    // =========================================================
-    // GET ALL SALES
-    // =========================================================
-
-    public async Task<IEnumerable<Sale>> GetAllSalesAsync(
-        CancellationToken cancellationToken)
+  
+    public async Task<IEnumerable<Sale>> GetAllSalesAsync( CancellationToken cancellationToken)
     {
         using var conn = _factory.CreateDbConnection();
 
@@ -83,13 +64,7 @@ public class SaleRepository : ISaleRepository
     }
 
 
-    // =========================================================
-    // GET SALE BY ID
-    // =========================================================
-
-    public async Task<Sale> GetSaleByIdAsync(
-        long id,
-        CancellationToken cancellationToken)
+    public async Task<Sale> GetSaleByIdAsync( long id, CancellationToken cancellationToken)
     {
         using var conn = _factory.CreateDbConnection();
 
@@ -103,8 +78,7 @@ public class SaleRepository : ISaleRepository
             commandType: CommandType.StoredProcedure,
             cancellationToken: cancellationToken);
 
-        var sale =
-            await conn.QuerySingleOrDefaultAsync<Sale>(command);
+        var sale =  await conn.QuerySingleOrDefaultAsync<Sale>(command);
 
         if (sale == null)
         {
@@ -116,13 +90,7 @@ public class SaleRepository : ISaleRepository
     }
 
 
-    // =========================================================
-    // UPDATE SALE
-    // =========================================================
-
-    public async Task<Sale> UpdateSaleAsync(
-        Sale sale,
-        CancellationToken cancellationToken)
+    public async Task<Sale> UpdateSaleAsync(  Sale sale, CancellationToken cancellationToken)
     {
         using var conn = _factory.CreateDbConnection();
 
@@ -153,17 +121,10 @@ public class SaleRepository : ISaleRepository
     }
 
 
-    // =========================================================
-    // DELETE SALE
-    // =========================================================
-
-    public async Task<Sale> DeleteSaleAsync(
-        long id,
-        CancellationToken cancellationToken)
+    public async Task<Sale> DeleteSaleAsync(  long id,CancellationToken cancellationToken)
     {
         using var conn = _factory.CreateDbConnection();
 
-        // First get sale
         var saleParameters = new DynamicParameters();
 
         saleParameters.Add("@Id", id);
@@ -184,7 +145,6 @@ public class SaleRepository : ISaleRepository
         }
 
 
-        // Delete sale
         var deleteParameters = new DynamicParameters();
 
         deleteParameters.Add("@Id", id);

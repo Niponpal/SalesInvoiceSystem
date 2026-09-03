@@ -14,10 +14,6 @@ public class ProductController : Controller
     }
 
 
-    // =========================================================
-    // PRODUCT LIST
-    // =========================================================
-
     [HttpGet]
     public async Task<IActionResult> Index( CancellationToken cancellationToken)
     {
@@ -27,101 +23,58 @@ public class ProductController : Controller
     }
 
 
-    // =========================================================
-    // PRODUCT DETAILS
-    // =========================================================
-
     [HttpGet]
-    public async Task<IActionResult> Details(
-        long id,
-        CancellationToken cancellationToken)
+    public async Task<IActionResult> Details(long id,CancellationToken cancellationToken)
     {
-        var product =
-            await _productRepository.GetProductByIdAsync(
-                id,
-                cancellationToken);
-
+        var product =await _productRepository.GetProductByIdAsync( id,cancellationToken);
         return View(product);
     }
 
 
-    // =========================================================
-    // CREATE OR EDIT - GET
-    // =========================================================
-
     [HttpGet]
-    public async Task<IActionResult> CreateOrEdit(
-        long? id,
-        CancellationToken cancellationToken)
+    public async Task<IActionResult> CreateOrEdit(long? id, CancellationToken cancellationToken)
    {
-        // Create
+     
         if (id == null || id == 0)
         {
             return View(new Product());
         }
 
-        // Edit
-        var product =
-            await _productRepository.GetProductByIdAsync(
-                id.Value,
-                cancellationToken);
+        var product = await _productRepository.GetProductByIdAsync(id.Value, cancellationToken);
 
         return View(product);
     }
 
-
-    // =========================================================
-    // CREATE OR EDIT - POST
-    // =========================================================
-
     [HttpPost]
     [ValidateAntiForgeryToken]
-    public async Task<IActionResult> CreateOrEdit(
-        Product product,
-        CancellationToken cancellationToken)
+    public async Task<IActionResult> CreateOrEdit( Product product,CancellationToken cancellationToken)
     {
         if (!ModelState.IsValid)
         {
             return View(product);
         }
 
-        // =====================================================
-        // CREATE
-        // =====================================================
-
         if (product.Id == 0)
         {
             product.CreatedDate = DateTime.Now;
 
-            await _productRepository.AddProductAsync(
-                product,
-                cancellationToken);
+            await _productRepository.AddProductAsync(product,cancellationToken);
 
-            TempData["SuccessMessage"] =
-                "Product created successfully.";
+            TempData["SuccessMessage"] = "Product created successfully.";
         }
 
-        // =====================================================
-        // UPDATE
-        // =====================================================
 
         else
         {
-            await _productRepository.UpdateProductAsync(
-                product,
-                cancellationToken);
+            await _productRepository.UpdateProductAsync( product, cancellationToken);
 
-            TempData["SuccessMessage"] =
-                "Product updated successfully.";
+            TempData["SuccessMessage"] = "Product updated successfully.";
         }
 
         return RedirectToAction(nameof(Index));
     }
 
 
-    // =========================================================
-    // DELETE - GET
-    // =========================================================
 
     [HttpGet]
     public async Task<IActionResult> Delete( long id, CancellationToken cancellationToken)
@@ -138,8 +91,7 @@ public class ProductController : Controller
     {
         await _productRepository.DeleteProductAsync( id,cancellationToken);
 
-        TempData["SuccessMessage"] =
-            "Product deleted successfully.";
+        TempData["SuccessMessage"] = "Product deleted successfully.";
 
         return RedirectToAction(nameof(Index));
     }

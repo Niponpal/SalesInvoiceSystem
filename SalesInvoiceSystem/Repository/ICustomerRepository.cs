@@ -27,13 +27,8 @@ public class CustomerRepository : ICustomerRepository
         _factory = factory;
     }
 
-    // =========================================================
-    // CREATE CUSTOMER
-    // =========================================================
 
-    public async Task<Customer> AddCustomerAsync(
-        Customer customer,
-        CancellationToken cancellationToken)
+    public async Task<Customer> AddCustomerAsync(  Customer customer,   CancellationToken cancellationToken)
     {
         using var conn = _factory.CreateDbConnection();
 
@@ -53,12 +48,7 @@ public class CustomerRepository : ICustomerRepository
         return await conn.QuerySingleAsync<Customer>(command);
     }
 
-    // =========================================================
-    // GET ALL CUSTOMERS
-    // =========================================================
-
-    public async Task<IEnumerable<Customer>> GetAllCustomerAsync(
-        CancellationToken cancellationToken)
+    public async Task<IEnumerable<Customer>> GetAllCustomerAsync(  CancellationToken cancellationToken)
     {
         using var conn = _factory.CreateDbConnection();
 
@@ -70,13 +60,8 @@ public class CustomerRepository : ICustomerRepository
         return await conn.QueryAsync<Customer>(command);
     }
 
-    // =========================================================
-    // GET CUSTOMER BY ID
-    // =========================================================
 
-    public async Task<Customer> GetCustomerByIdAsync(
-        long id,
-        CancellationToken cancellationToken)
+    public async Task<Customer> GetCustomerByIdAsync( long id, CancellationToken cancellationToken)
     {
         using var conn = _factory.CreateDbConnection();
 
@@ -101,10 +86,6 @@ public class CustomerRepository : ICustomerRepository
 
         return customer;
     }
-
-    // =========================================================
-    // UPDATE CUSTOMER
-    // =========================================================
 
     public async Task<Customer> UpdateCustomerAsync(
         Customer customer,
@@ -138,10 +119,7 @@ public class CustomerRepository : ICustomerRepository
         return result;
     }
 
-    // =========================================================
-    // DELETE CUSTOMER
-    // =========================================================
-
+   
     public async Task<Customer> DeleteCustomerAsync(
         long id,
         CancellationToken cancellationToken)
@@ -168,7 +146,7 @@ public class CustomerRepository : ICustomerRepository
                 $"Customer with Id {id} not found.");
         }
 
-        // Delete customer
+      
         var deleteParameters = new DynamicParameters();
 
         deleteParameters.Add("@Id", id);
