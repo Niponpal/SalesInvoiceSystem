@@ -1,5 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-
+using Microsoft.Reporting.NETCore;
 using SalesInvoiceSystem.Models;
 using SalesInvoiceSystem.Repository;
 using System.Data;
@@ -27,7 +27,7 @@ namespace SalesInvoiceSystem.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> Index( CancellationToken cancellationToken)
+        public async Task<IActionResult> Index(CancellationToken cancellationToken)
         {
             var sales = await _saleRepository.GetAllSalesAsync(cancellationToken);
 
@@ -210,61 +210,42 @@ namespace SalesInvoiceSystem.Controllers
                 return RedirectToAction(nameof(Index));
             }
         }
-
-        public async Task<IActionResult> Print(
-    long id,
-    CancellationToken cancellationToken)
+        [HttpGet]
+        public async Task<IActionResult> Print(long id, CancellationToken cancellationToken)
         {
-            var reportData =
-                await _saleRepository.GetSaleInvoiceReportAsync(
-                    id,
-                    cancellationToken);
+            if (id <= 0) return BadRequest("Invalid sale id.");
 
+            var reportData = await _saleRepository.GetSaleInvoiceReportAsync(id, cancellationToken);
             if (reportData == null || reportData.Count == 0)
-            {
-                return NotFound("Sale invoice not found.");
-            }
+                return NotFound("Sale invoice data not found.");
 
-
-            // RDLC path
-            var reportPath = Path.Combine(
-                _environment.ContentRootPath,
-                "Reports",
-                "SaleInvoice.rdlc"
-            );
-
+            var reportPath = Path.Combine(_environment.ContentRootPath, "Report", "SalesInvoice.rdlc");
             if (!System.IO.File.Exists(reportPath))
+                return NotFound($"RDLC not found: {reportPath}");
+
+            try
             {
-                return NotFound("SaleInvoice.rdlc not found.");
+                using var report = new LocalReport();
+                report.ReportPath = reportPath; // important
+
+                report.DataSources.Clear();
+                report.DataSources.Add(new ReportDataSource("SaleInvoiceDataSet", reportData));
+
+                // Optional: force processing context
+                report.Refresh();
+
+                var pdf = report.Render("PDF");
+                var invoiceNo = reportData.FirstOrDefault()?.InvoiceNo ?? $"Invoice_{id}";
+                return File(pdf, "application/pdf", $"{invoiceNo}.pdf");
             }
-
-            // RDLC
-            using var report = new Microsoft.Reporting.WebForms.LocalReport();
-
-            report.ReportPath = reportPath;
-
-            // Bind Dataset
-            report.DataSources.Clear();
-
-            report.DataSources.Add(
-                new ReportDataSource(
-                    "SaleInvoiceDataSet",
-                    reportData
-                )
-            );
-
-            // Generate PDF
-            var pdf = report.Render("PDF");
-
-            var invoiceNo = reportData
-                .First()
-                .InvoiceNo;
-
-            return File(
-                pdf,
-                "application/pdf",
-                $"{invoiceNo}.pdf"
-            );
+            catch (Exception ex)
+            {
+                return StatusCode(500,
+                    $"Report generation failed.\n" +
+                    $"Path: {reportPath}\n" +
+                    $"Message: {ex.Message}\n" +
+                    $"Inner: {ex.InnerException?.Message}");
+            }
         }
 
         private async Task LoadDropdowns(CancellationToken cancellationToken)
