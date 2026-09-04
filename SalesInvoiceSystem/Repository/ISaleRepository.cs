@@ -1,5 +1,6 @@
 ﻿using Dapper;
 using SalesInvoiceSystem.Data;
+using SalesInvoiceSystem.DTOs;
 using SalesInvoiceSystem.Models;
 using System.Data;
 
@@ -16,6 +17,10 @@ public interface ISaleRepository
     Task<Sale> UpdateSaleAsync(Sale sale, CancellationToken cancellationToken);
 
     Task<Sale> DeleteSaleAsync(long id, CancellationToken cancellationToken);
+
+    Task<List<SaleInvoiceReportDto>> GetSaleInvoiceReportAsync(
+    long id,
+    CancellationToken cancellationToken);
 }
 
 public class SaleRepository : ISaleRepository
@@ -26,7 +31,75 @@ public class SaleRepository : ISaleRepository
     {
         _factory = factory;
     }
+    public async Task<List<SaleInvoiceReportDto>> GetSaleInvoiceReportAsync(
+    long id,
+    CancellationToken cancellationToken)
+    {
+        using var conn = _factory.CreateDbConnection();
 
+        var parameters = new DynamicParameters();
+        parameters.Add("@Id", id);
+
+        var command = new CommandDefinition(
+            "dbo.sp_Sale_GetById",
+            parameters,
+            commandType: CommandType.StoredProcedure,
+            cancellationToken: cancellationToken
+        );
+
+        using var multi = await conn.QueryMultipleAsync(command);
+
+        // Result 1: Sale
+        var sale = await multi.ReadSingleOrDefaultAsync<Sale>();
+
+        if (sale == null)
+        {
+            throw new KeyNotFoundException(
+                $"Sale with Id {id} not found.");
+        }
+
+        // Result 2: Customer
+        sale.Customer =
+            await multi.ReadSingleOrDefaultAsync<Customer>();
+
+        // Result 3: SaleDetails + Product
+        sale.SaleDetails = multi
+            .Read<SaleDetail, Product, SaleDetail>(
+                (detail, product) =>
+                {
+                    detail.Product = product;
+                    return detail;
+                },
+                splitOn: "ProductId"
+            )
+            .ToList();
+
+        // Convert to Report DTO
+        var reportData = sale.SaleDetails
+            .Select(detail => new SaleInvoiceReportDto
+            {
+                SaleId = sale.Id,
+                InvoiceNo = sale.InvoiceNo,
+                SaleDate = sale.SaleDate,
+
+                CustomerId = sale.CustomerId,
+                CustomerName = sale.Customer?.CustomerName ?? "",
+                CustomerPhone = sale.Customer?.Phone ?? "",
+                CustomerAddress = sale.Customer?.Address ?? "",
+
+                ProductId = detail.ProductId,
+                ProductName = detail.Product?.ProductName ?? "",
+
+                Quantity = detail.Quantity,
+                UnitPrice = detail.UnitPrice,
+                TotalPrice = detail.TotalPrice,
+
+                InvoiceTotal = sale.TotalAmount
+            })
+            .ToList();
+
+        return reportData;
+    }
     public async Task<Sale> AddSaleAsync(Sale sale, CancellationToken cancellationToken)
     {
         using var conn = _factory.CreateDbConnection();
