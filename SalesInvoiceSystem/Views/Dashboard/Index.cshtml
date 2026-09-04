@@ -69,6 +69,7 @@
             .btn-apply:hover {
                 background: var(--primary-dark);
             }
+
         /* Cards */
         .stat-card {
             background: var(--card-bg);
@@ -194,7 +195,7 @@
     </style>
 }
 
-<div class="container-fluid">
+<div class="container-fluid px-0">
 
     <!-- Dashboard Header -->
     <div class="d-flex justify-content-between align-items-center mb-4">
@@ -205,24 +206,21 @@
             </h3>
             <p class="text-muted mb-0">Sales Invoice Management System</p>
         </div>
-        <a asp-controller="Sale" asp-action="CreateOrEdit" class="btn btn-primary">
-            <i class="bi bi-plus-circle me-1"></i> Create Invoice
-        </a>
     </div>
 
     <!-- Filter + Search Section -->
     <div class="filter-section mb-5">
         <span class="filter-label">
-            <i class="bi bi-funnel me-1"></i> Filter:
+            <i class="bi bi-funnel me-1"></i> Filter & Search:
         </span>
 
         <div class="search-box">
             <i class="bi bi-search"></i>
             <input type="text" id="searchInput" class="form-control"
-                   placeholder="Search customer, product, date, invoice..." autocomplete="off" />
+                   placeholder="Search customer, product, invoice no or date..." autocomplete="off" />
         </div>
 
-        <select class="filter-select form-select" id="customerFilter">
+        <select class="filter-select form-select" id="customerFilter" title="Filter by Customer Name">
             <option value="all">All Customers</option>
             <option value="rahim">Rahim Ahmed</option>
             <option value="karim">Karim Hasan</option>
@@ -231,7 +229,7 @@
             <option value="jannatul">Jannatul Ferdous</option>
         </select>
 
-        <select class="filter-select form-select" id="productFilter">
+        <select class="filter-select form-select" id="productFilter" title="Filter by Product Name">
             <option value="all">All Products</option>
             <option value="laptop">Laptop</option>
             <option value="keyboard">Keyboard</option>
@@ -240,7 +238,7 @@
             <option value="printer">Printer</option>
         </select>
 
-        <input type="date" id="dateFilter" class="filter-select form-control" />
+        <input type="date" id="dateFilter" class="filter-select form-control" title="Filter by Date" />
 
         <button type="button" id="applyFilter" class="btn-apply">
             <i class="bi bi-search me-1"></i> Apply
@@ -320,12 +318,10 @@
                 </div>
             </div>
         </div>
-
         <div class="col-md-6">
             <div class="chart-card">
                 <h5 class="chart-title mb-1">Payment Status</h5>
                 <small class="text-muted d-block mb-4">Invoice payment overview</small>
-
                 <div class="d-flex justify-content-between mb-2">
                     <span class="fw-semibold">Paid</span>
                     <span class="text-success fw-bold">85.7%</span>
@@ -333,7 +329,6 @@
                 <div class="progress rounded-pill mb-4" style="height:14px;">
                     <div class="progress-bar bg-success" style="width:85.7%;"></div>
                 </div>
-
                 <div class="d-flex justify-content-between mb-2">
                     <span class="fw-semibold">Pending</span>
                     <span class="text-warning fw-bold">9.3%</span>
@@ -341,7 +336,6 @@
                 <div class="progress rounded-pill mb-4" style="height:14px;">
                     <div class="progress-bar bg-warning" style="width:9.3%;"></div>
                 </div>
-
                 <div class="d-flex justify-content-between mb-2">
                     <span class="fw-semibold">Unpaid</span>
                     <span class="text-danger fw-bold">5%</span>
@@ -390,7 +384,7 @@
         </div>
     </div>
 
-    <!-- ===================== RECENT INVOICES TABLE ===================== -->
+    <!-- Recent Invoices Table -->
     <div class="recent-reg-table mb-5">
         <h5 class="fw-semibold mb-3 px-4 pt-4">
             <i class="bi bi-list-ul me-2"></i> Recent Invoices
@@ -478,7 +472,6 @@
             </table>
         </div>
     </div>
-
 </div>
 
 @section Scripts {
@@ -493,40 +486,32 @@
             const rows           = document.querySelectorAll("#invoiceTable tbody tr");
 
             function filterTable() {
-                const searchText = searchInput.value.toLowerCase().trim();
+                const searchText = (searchInput.value || "").toLowerCase().trim();
                 const customer   = customerFilter.value;
                 const product    = productFilter.value;
                 const date       = dateFilter.value;
 
                 rows.forEach(function (row) {
-                    const rowCustomer = row.dataset.customer || "";
-                    const rowProduct  = row.dataset.product || "";
+                    const rowCustomer = (row.dataset.customer || "").toLowerCase();
+                    const rowProduct  = (row.dataset.product || "").toLowerCase();
                     const rowDate     = row.dataset.date || "";
                     const rowText     = row.innerText.toLowerCase();
 
                     const searchMatch   = searchText === "" || rowText.includes(searchText);
-                    const customerMatch = customer === "all" || rowCustomer === customer;
-                    const productMatch  = product === "all" || rowProduct === product;
+                    const customerMatch = customer === "all" || rowCustomer === customer.toLowerCase();
+                    const productMatch  = product === "all"  || rowProduct === product.toLowerCase();
                     const dateMatch     = date === "" || rowDate === date;
 
                     row.style.display = (searchMatch && customerMatch && productMatch && dateMatch) ? "" : "none";
                 });
             }
 
-            // Local search box
-            if (searchInput) {
-                searchInput.addEventListener("input", filterTable);
-            }
+            if (searchInput) searchInput.addEventListener("input", filterTable);
+            if (applyFilter) applyFilter.addEventListener("click", filterTable);
 
-            // Apply button
-            if (applyFilter) {
-                applyFilter.addEventListener("click", filterTable);
-            }
-
-            // Reset
             if (clearFilter) {
                 clearFilter.addEventListener("click", function () {
-                    if (searchInput) searchInput.value = "";
+                    searchInput.value = "";
                     customerFilter.value = "all";
                     productFilter.value = "all";
                     dateFilter.value = "";
@@ -534,7 +519,6 @@
                 });
             }
 
-            // Dropdown change
             customerFilter.addEventListener("change", filterTable);
             productFilter.addEventListener("change", filterTable);
             dateFilter.addEventListener("change", filterTable);
