@@ -61,16 +61,26 @@ public class SaleRepository : ISaleRepository
         return result;
     }
 
-    public async Task<IEnumerable<Sale>> GetAllSalesAsync(CancellationToken cancellationToken)
+    public async Task<IEnumerable<Sale>> GetAllSalesAsync(
+       CancellationToken cancellationToken)
     {
         using var conn = _factory.CreateDbConnection();
 
         var command = new CommandDefinition(
-            "sp_Sale_GetAll",
+            "dbo.sp_Sale_GetAll",
             commandType: CommandType.StoredProcedure,
             cancellationToken: cancellationToken);
 
-        return await conn.QueryAsync<Sale>(command);
+        var sales = await conn.QueryAsync<Sale, Customer, Sale>(
+            command,
+            (sale, customer) =>
+            {
+                sale.Customer = customer;
+                return sale;
+            },
+            splitOn: "Customer_Id");
+
+        return sales;
     }
 
     public async Task<Sale> GetSaleByIdAsync(long id, CancellationToken cancellationToken)

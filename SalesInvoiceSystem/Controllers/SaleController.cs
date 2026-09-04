@@ -21,7 +21,7 @@ namespace SalesInvoiceSystem.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> Index(CancellationToken cancellationToken)
+        public async Task<IActionResult> Index( CancellationToken cancellationToken)
         {
             var sales = await _saleRepository.GetAllSalesAsync(cancellationToken);
 
