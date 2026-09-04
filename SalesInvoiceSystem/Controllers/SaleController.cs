@@ -20,45 +20,22 @@ namespace SalesInvoiceSystem.Controllers
             _customerRepository = customerRepository;
         }
 
-
-        // ==========================================
-        // INDEX
-        // ==========================================
-
         [HttpGet]
-        public async Task<IActionResult> Index(
-            CancellationToken cancellationToken)
+        public async Task<IActionResult> Index(CancellationToken cancellationToken)
         {
-            var sales =
-                await _saleRepository.GetAllSalesAsync(
-                    cancellationToken);
+            var sales = await _saleRepository.GetAllSalesAsync(cancellationToken);
 
             return View(sales);
         }
 
-
-        // ==========================================
-        // CREATE / EDIT GET
-        // ==========================================
-
         [HttpGet]
-        public async Task<IActionResult> CreateOrEdit(
-            int? id,
-            CancellationToken cancellationToken)
+        public async Task<IActionResult> CreateOrEdit(int? id, CancellationToken cancellationToken)
         {
             await LoadDropdowns(cancellationToken);
 
-
-            // ==========================================
-            // EDIT
-            // ==========================================
-
             if (id.HasValue && id.Value > 0)
             {
-                var sale =
-                    await _saleRepository.GetSaleByIdAsync(
-                        id.Value,
-                        cancellationToken);
+                var sale = await _saleRepository.GetSaleByIdAsync(id.Value, cancellationToken);
 
                 if (sale == null)
                 {
@@ -68,33 +45,17 @@ namespace SalesInvoiceSystem.Controllers
                 return View(sale);
             }
 
-
-            // ==========================================
-            // CREATE
-            // ==========================================
-
             var newSale = new Sale
             {
-                InvoiceNo =
-                    $"INV-{DateTime.Now:yyyyMMddHHmmss}",
-
+                InvoiceNo = $"INV-{DateTime.Now:yyyyMMddHHmmss}",
                 SaleDate = DateTime.Now,
-
                 CustomerId = 0,
-
                 TotalAmount = 0,
-
-                SaleDetails =
-                    new List<SaleDetail>()
+                SaleDetails = new List<SaleDetail>()
             };
 
             return View(newSale);
         }
-
-
-        // ==========================================
-        // CREATE / EDIT POST
-        // ==========================================
 
         [HttpPost]
         [ValidateAntiForgeryToken]
@@ -104,47 +65,20 @@ namespace SalesInvoiceSystem.Controllers
         {
             await LoadDropdowns(cancellationToken);
 
-
-            // ==========================================
-            // INVOICE VALIDATION
-            // ==========================================
-
             if (string.IsNullOrWhiteSpace(sale.InvoiceNo))
             {
-                ModelState.AddModelError(
-                    nameof(sale.InvoiceNo),
-                    "Invoice number is required.");
+                ModelState.AddModelError(nameof(sale.InvoiceNo), "Invoice number is required.");
             }
-
-
-            // ==========================================
-            // CUSTOMER VALIDATION
-            // ==========================================
 
             if (sale.CustomerId <= 0)
             {
-                ModelState.AddModelError(
-                    nameof(sale.CustomerId),
-                    "Please select a customer.");
+                ModelState.AddModelError(nameof(sale.CustomerId), "Please select a customer.");
             }
 
-
-            // ==========================================
-            // SALE DETAILS VALIDATION
-            // ==========================================
-
-            if (sale.SaleDetails == null ||
-                sale.SaleDetails.Count == 0)
+            if (sale.SaleDetails == null || sale.SaleDetails.Count == 0)
             {
-                ModelState.AddModelError(
-                    "",
-                    "Please add at least one product.");
+                ModelState.AddModelError("", "Please add at least one product.");
             }
-
-
-            // ==========================================
-            // PRODUCT VALIDATION
-            // ==========================================
 
             if (sale.SaleDetails != null)
             {
@@ -152,187 +86,97 @@ namespace SalesInvoiceSystem.Controllers
                 {
                     if (detail.ProductId <= 0)
                     {
-                        ModelState.AddModelError(
-                            "",
-                            "Please select a valid product.");
+                        ModelState.AddModelError("", "Please select a valid product.");
                     }
 
                     if (detail.Quantity <= 0)
                     {
-                        ModelState.AddModelError(
-                            "",
-                            "Quantity must be greater than 0.");
+                        ModelState.AddModelError("", "Quantity must be greater than 0.");
                     }
 
                     if (detail.UnitPrice <= 0)
                     {
-                        ModelState.AddModelError(
-                            "",
-                            "Invalid product price.");
+                        ModelState.AddModelError("", "Invalid product price.");
                     }
                 }
             }
 
-
-          
-          
-
-            // ==========================================
-            // CALCULATE DETAIL TOTAL
-            // ==========================================
-
             foreach (var detail in sale.SaleDetails)
             {
-                detail.TotalPrice =
-                    detail.Quantity *
-                    detail.UnitPrice;
+                detail.TotalPrice = detail.Quantity * detail.UnitPrice;
             }
 
-
-            // ==========================================
-            // CALCULATE GRAND TOTAL
-            // ==========================================
-
-            sale.TotalAmount =
-                sale.SaleDetails.Sum(
-                    x => x.TotalPrice);
-
-
-            // ==========================================
-            // CREATE
-            // ==========================================
+            sale.TotalAmount = sale.SaleDetails.Sum(x => x.TotalPrice);
 
             if (sale.Id == 0)
             {
                 try
                 {
-                    var createdSale =
-                        await _saleRepository.AddSaleAsync(
-                            sale,
-                            cancellationToken);
+                    var createdSale = await _saleRepository.AddSaleAsync(sale, cancellationToken);
 
+                    TempData["SuccessMessage"] = "Invoice created successfully.";
 
-                    TempData["SuccessMessage"] =
-                        "Invoice created successfully.";
-
-
-                    return RedirectToAction(
-                        nameof(Details),
-                        new
-                        {
-                            id = createdSale.Id
-                        });
+                    return RedirectToAction(nameof(Details), new { id = createdSale.Id });
                 }
                 catch (Exception ex)
                 {
-                    ModelState.AddModelError(
-                        "",
-                        ex.Message);
+                    ModelState.AddModelError("", ex.Message);
 
                     return View(sale);
                 }
             }
 
-
-            // ==========================================
-            // EDIT
-            // ==========================================
-
             try
             {
-                var updatedSale =
-                    await _saleRepository.UpdateSaleAsync(
-                        sale,
-                        cancellationToken);
+                var updatedSale = await _saleRepository.UpdateSaleAsync(sale, cancellationToken);
 
+                TempData["SuccessMessage"] = "Invoice updated successfully.";
 
-                TempData["SuccessMessage"] =
-                    "Invoice updated successfully.";
-
-
-                return RedirectToAction(
-                    nameof(Details),
-                    new
-                    {
-                        id = updatedSale.Id
-                    });
+                return RedirectToAction(nameof(Details), new { id = updatedSale.Id });
             }
             catch (Exception ex)
             {
-                ModelState.AddModelError(
-                    "",
-                    ex.Message);
+                ModelState.AddModelError("", ex.Message);
 
                 return View(sale);
             }
         }
 
-
-        // ==========================================
-        // DETAILS
-        // ==========================================
-
         [HttpGet]
-        public async Task<IActionResult> Details(
-            int id,
-            CancellationToken cancellationToken)
+        public async Task<IActionResult> Details(int id, CancellationToken cancellationToken)
         {
             if (id <= 0)
             {
                 return BadRequest();
             }
 
-
-            var sale =
-                await _saleRepository.GetSaleByIdAsync(
-                    id,
-                    cancellationToken);
-
+            var sale = await _saleRepository.GetSaleByIdAsync(id, cancellationToken);
 
             if (sale == null)
             {
                 return NotFound();
             }
 
-
             return View(sale);
         }
 
-
-        // ==========================================
-        // DELETE GET
-        // ==========================================
-
         [HttpGet]
-        public async Task<IActionResult> Delete(
-            int id,
-            CancellationToken cancellationToken)
+        public async Task<IActionResult> Delete(int id, CancellationToken cancellationToken)
         {
             if (id <= 0)
             {
                 return BadRequest();
             }
 
-
-            var sale =
-                await _saleRepository.GetSaleByIdAsync(
-                    id,
-                    cancellationToken);
-
+            var sale = await _saleRepository.GetSaleByIdAsync(id, cancellationToken);
 
             if (sale == null)
             {
                 return NotFound();
             }
 
-
             return View(sale);
         }
-
-
-        // ==========================================
-        // DELETE POST
-        // ==========================================
 
         [HttpPost]
         [ValidateAntiForgeryToken]
@@ -345,49 +189,27 @@ namespace SalesInvoiceSystem.Controllers
                 return BadRequest();
             }
 
-
             try
             {
-                await _saleRepository.DeleteSaleAsync(
-                    id,
-                    cancellationToken);
+                await _saleRepository.DeleteSaleAsync(id, cancellationToken);
 
+                TempData["SuccessMessage"] = "Invoice deleted successfully.";
 
-                TempData["SuccessMessage"] =
-                    "Invoice deleted successfully.";
-
-
-                return RedirectToAction(
-                    nameof(Index));
+                return RedirectToAction(nameof(Index));
             }
             catch (Exception ex)
             {
-                TempData["ErrorMessage"] =
-                    ex.Message;
+                TempData["ErrorMessage"] = ex.Message;
 
-
-                return RedirectToAction(
-                    nameof(Index));
+                return RedirectToAction(nameof(Index));
             }
         }
 
-
-        // ==========================================
-        // LOAD DROPDOWNS
-        // ==========================================
-
-        private async Task LoadDropdowns(
-            CancellationToken cancellationToken)
+        private async Task LoadDropdowns(CancellationToken cancellationToken)
         {
-            var products =
-                await _productRepository.GetAllProductAsync(
-                    cancellationToken);
+            var products = await _productRepository.GetAllProductAsync(cancellationToken);
 
-
-            var customers =
-                await _customerRepository.GetAllCustomerAsync(
-                    cancellationToken);
-
+            var customers = await _customerRepository.GetAllCustomerAsync(cancellationToken);
 
             ViewBag.Products = products;
 
