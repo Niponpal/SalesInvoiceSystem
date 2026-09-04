@@ -174,15 +174,8 @@ namespace SalesInvoiceSystem.Controllers
             }
 
 
-            // ==========================================
-            // STOP IF VALIDATION FAILED
-            // ==========================================
-
-            if (!ModelState.IsValid)
-            {
-                return View(sale);
-            }
-
+          
+          
 
             // ==========================================
             // CALCULATE DETAIL TOTAL

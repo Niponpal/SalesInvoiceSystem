@@ -130,28 +130,43 @@ public class SaleRepository : ISaleRepository
         return await conn.QueryAsync<Sale>(command);
     }
 
-
-    public async Task<Sale> GetSaleByIdAsync( long id, CancellationToken cancellationToken)
+    public async Task<Sale> GetSaleByIdAsync(
+        long id,
+        CancellationToken cancellationToken)
     {
         using var conn = _factory.CreateDbConnection();
 
         var parameters = new DynamicParameters();
-
         parameters.Add("@Id", id);
 
         var command = new CommandDefinition(
-            "sp_Sale_GetById",
+            "dbo.sp_Sale_GetById",
             parameters,
             commandType: CommandType.StoredProcedure,
             cancellationToken: cancellationToken);
 
-        var sale =  await conn.QuerySingleOrDefaultAsync<Sale>(command);
+        using var multi = await conn.QueryMultipleAsync(command);
+
+        // 1. Read Sale
+        var sale = await multi.ReadSingleOrDefaultAsync<Sale>();
 
         if (sale == null)
         {
-            throw new KeyNotFoundException(
-                $"Sale with Id {id} not found.");
+            throw new KeyNotFoundException($"Sale with Id {id} not found.");
         }
+
+        // 2. Read Customer
+        sale.Customer = await multi.ReadSingleOrDefaultAsync<Customer>();
+
+        // 3. Read SaleDetails WITH Product Mapping
+        sale.SaleDetails = multi.Read<SaleDetail, Product, SaleDetail>(
+            (detail, product) =>
+            {
+                detail.Product = product;
+                return detail;
+            },
+            splitOn: "Id" // Product টেবিলের Id কলাম ধরে Dapper split করবে
+        ).ToList();
 
         return sale;
     }
