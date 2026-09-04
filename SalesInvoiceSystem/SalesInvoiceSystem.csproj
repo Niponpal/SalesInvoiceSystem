@@ -21,4 +21,19 @@
     <PackageReference Include="ServiceStack.Common" Version="10.1.4" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Compile Update="Report\Dataset\SalesInvoiceDataSet.Designer.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>SalesInvoiceDataSet.xsd</DependentUpon>
+    </Compile>
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Update="Report\Dataset\SalesInvoiceDataSet.xsd">
+      <Generator>MSDataSetGenerator</Generator>
+      <LastGenOutput>SalesInvoiceDataSet.Designer.cs</LastGenOutput>
+    </None>
+  </ItemGroup>
+
 </Project>

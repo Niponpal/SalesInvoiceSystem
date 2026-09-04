@@ -1,6 +1,8 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+
 using SalesInvoiceSystem.Models;
 using SalesInvoiceSystem.Repository;
+using System.Data;
 
 namespace SalesInvoiceSystem.Controllers
 {
@@ -10,18 +12,22 @@ namespace SalesInvoiceSystem.Controllers
         private readonly IProductRepository _productRepository;
         private readonly ICustomerRepository _customerRepository;
 
+        private readonly IWebHostEnvironment _environment;
+
         public SaleController(
             ISaleRepository saleRepository,
             IProductRepository productRepository,
-            ICustomerRepository customerRepository)
+            ICustomerRepository customerRepository,
+            IWebHostEnvironment environment)
         {
             _saleRepository = saleRepository;
             _productRepository = productRepository;
             _customerRepository = customerRepository;
+            _environment = environment;
         }
 
         [HttpGet]
-        public async Task<IActionResult> Index(CancellationToken cancellationToken)
+        public async Task<IActionResult> Index( CancellationToken cancellationToken)
         {
             var sales = await _saleRepository.GetAllSalesAsync(cancellationToken);
 
@@ -203,6 +209,62 @@ namespace SalesInvoiceSystem.Controllers
 
                 return RedirectToAction(nameof(Index));
             }
+        }
+
+        public async Task<IActionResult> Print(
+    long id,
+    CancellationToken cancellationToken)
+        {
+            var reportData =
+                await _saleRepository.GetSaleInvoiceReportAsync(
+                    id,
+                    cancellationToken);
+
+            if (reportData == null || reportData.Count == 0)
+            {
+                return NotFound("Sale invoice not found.");
+            }
+
+
+            // RDLC path
+            var reportPath = Path.Combine(
+                _environment.ContentRootPath,
+                "Reports",
+                "SaleInvoice.rdlc"
+            );
+
+            if (!System.IO.File.Exists(reportPath))
+            {
+                return NotFound("SaleInvoice.rdlc not found.");
+            }
+
+            // RDLC
+            using var report = new Microsoft.Reporting.WebForms.LocalReport();
+
+            report.ReportPath = reportPath;
+
+            // Bind Dataset
+            report.DataSources.Clear();
+
+            report.DataSources.Add(
+                new ReportDataSource(
+                    "SaleInvoiceDataSet",
+                    reportData
+                )
+            );
+
+            // Generate PDF
+            var pdf = report.Render("PDF");
+
+            var invoiceNo = reportData
+                .First()
+                .InvoiceNo;
+
+            return File(
+                pdf,
+                "application/pdf",
+                $"{invoiceNo}.pdf"
+            );
         }
 
         private async Task LoadDropdowns(CancellationToken cancellationToken)

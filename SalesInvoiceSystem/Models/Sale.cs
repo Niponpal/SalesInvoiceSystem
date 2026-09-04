@@ -22,7 +22,7 @@ namespace SalesInvoiceSystem.Models
         [ForeignKey("CustomerId")]
         public Customer? Customer { get; set; }
 
-
+   
         public ICollection<SaleDetail> SaleDetails { get; set; }
            = new List<SaleDetail>();
 
