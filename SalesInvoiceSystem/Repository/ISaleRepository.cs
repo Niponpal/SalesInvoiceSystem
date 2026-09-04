@@ -9,15 +9,14 @@ public interface ISaleRepository
 {
     Task<IEnumerable<Sale>> GetAllSalesAsync(CancellationToken cancellationToken);
 
-    Task<Sale> GetSaleByIdAsync( long id,CancellationToken cancellationToken);
+    Task<Sale> GetSaleByIdAsync(long id, CancellationToken cancellationToken);
 
-    Task<Sale> AddSaleAsync( Sale sale, CancellationToken cancellationToken);
+    Task<Sale> AddSaleAsync(Sale sale, CancellationToken cancellationToken);
 
-    Task<Sale> UpdateSaleAsync( Sale sale, CancellationToken cancellationToken);
+    Task<Sale> UpdateSaleAsync(Sale sale, CancellationToken cancellationToken);
 
-    Task<Sale> DeleteSaleAsync( long id, CancellationToken cancellationToken);
+    Task<Sale> DeleteSaleAsync(long id, CancellationToken cancellationToken);
 }
-
 
 public class SaleRepository : ISaleRepository
 {
@@ -28,58 +27,21 @@ public class SaleRepository : ISaleRepository
         _factory = factory;
     }
 
-
-    public async Task<Sale> AddSaleAsync(
-     Sale sale,
-     CancellationToken cancellationToken)
+    public async Task<Sale> AddSaleAsync(Sale sale, CancellationToken cancellationToken)
     {
         using var conn = _factory.CreateDbConnection();
 
         var parameters = new DynamicParameters();
-
-        parameters.Add(
-            "@InvoiceNo",
-            sale.InvoiceNo.Trim());
-
-        parameters.Add(
-            "@SaleDate",
-            sale.SaleDate);
-
-        parameters.Add(
-            "@CustomerId",
-            sale.CustomerId);
-
-        parameters.Add(
-            "@TotalAmount",
-            sale.TotalAmount);
-
-
-        // ==========================================
-        // CREATE SALE DETAIL DATATABLE
-        // ==========================================
+        parameters.Add("@InvoiceNo", sale.InvoiceNo.Trim());
+        parameters.Add("@SaleDate", sale.SaleDate);
+        parameters.Add("@CustomerId", sale.CustomerId);
+        parameters.Add("@TotalAmount", sale.TotalAmount);
 
         var saleDetailsTable = new DataTable();
-
-        saleDetailsTable.Columns.Add(
-            "ProductId",
-            typeof(int));
-
-        saleDetailsTable.Columns.Add(
-            "Quantity",
-            typeof(int));
-
-        saleDetailsTable.Columns.Add(
-            "UnitPrice",
-            typeof(decimal));
-
-        saleDetailsTable.Columns.Add(
-            "TotalPrice",
-            typeof(decimal));
-
-
-        // ==========================================
-        // ADD SALE DETAILS
-        // ==========================================
+        saleDetailsTable.Columns.Add("ProductId", typeof(int));
+        saleDetailsTable.Columns.Add("Quantity", typeof(int));
+        saleDetailsTable.Columns.Add("UnitPrice", typeof(decimal));
+        saleDetailsTable.Columns.Add("TotalPrice", typeof(decimal));
 
         foreach (var detail in sale.SaleDetails)
         {
@@ -90,35 +52,16 @@ public class SaleRepository : ISaleRepository
                 detail.TotalPrice);
         }
 
+        parameters.Add("@SaleDetails", saleDetailsTable.AsTableValuedParameter("dbo.SaleDetailType"));
 
-        // ==========================================
-        // ADD TVP PARAMETER
-        // ==========================================
+        var command = new CommandDefinition("sp_Sale_Create", parameters, commandType: CommandType.StoredProcedure, cancellationToken: cancellationToken);
 
-        parameters.Add(
-            "@SaleDetails",
-            saleDetailsTable.AsTableValuedParameter(
-                "dbo.SaleDetailType"));
-
-
-        // ==========================================
-        // EXECUTE STORED PROCEDURE
-        // ==========================================
-
-        var command = new CommandDefinition(
-            "sp_Sale_Create",
-            parameters,
-            commandType: CommandType.StoredProcedure,
-            cancellationToken: cancellationToken);
-
-
-        var result =
-            await conn.QuerySingleAsync<Sale>(command);
+        var result = await conn.QuerySingleAsync<Sale>(command);
 
         return result;
     }
 
-    public async Task<IEnumerable<Sale>> GetAllSalesAsync( CancellationToken cancellationToken)
+    public async Task<IEnumerable<Sale>> GetAllSalesAsync(CancellationToken cancellationToken)
     {
         using var conn = _factory.CreateDbConnection();
 
@@ -130,9 +73,7 @@ public class SaleRepository : ISaleRepository
         return await conn.QueryAsync<Sale>(command);
     }
 
-    public async Task<Sale> GetSaleByIdAsync(
-        long id,
-        CancellationToken cancellationToken)
+    public async Task<Sale> GetSaleByIdAsync(long id, CancellationToken cancellationToken)
     {
         using var conn = _factory.CreateDbConnection();
 
@@ -147,7 +88,6 @@ public class SaleRepository : ISaleRepository
 
         using var multi = await conn.QueryMultipleAsync(command);
 
-        // 1. Read Sale
         var sale = await multi.ReadSingleOrDefaultAsync<Sale>();
 
         if (sale == null)
@@ -155,29 +95,25 @@ public class SaleRepository : ISaleRepository
             throw new KeyNotFoundException($"Sale with Id {id} not found.");
         }
 
-        // 2. Read Customer
         sale.Customer = await multi.ReadSingleOrDefaultAsync<Customer>();
 
-        // 3. Read SaleDetails WITH Product Mapping
         sale.SaleDetails = multi.Read<SaleDetail, Product, SaleDetail>(
             (detail, product) =>
             {
                 detail.Product = product;
                 return detail;
             },
-            splitOn: "Id" // Product টেবিলের Id কলাম ধরে Dapper split করবে
+            splitOn: "Id"
         ).ToList();
 
         return sale;
     }
 
-
-    public async Task<Sale> UpdateSaleAsync(  Sale sale, CancellationToken cancellationToken)
+    public async Task<Sale> UpdateSaleAsync(Sale sale, CancellationToken cancellationToken)
     {
         using var conn = _factory.CreateDbConnection();
 
         var parameters = new DynamicParameters();
-
         parameters.Add("@Id", sale.Id);
         parameters.Add("@InvoiceNo", sale.InvoiceNo.Trim());
         parameters.Add("@CustomerId", sale.CustomerId);
@@ -185,30 +121,26 @@ public class SaleRepository : ISaleRepository
         parameters.Add("@TotalAmount", sale.TotalAmount);
 
         var command = new CommandDefinition(
-            "sp_Sale_Update",
+            "dbo.sp_Sale_Update",
             parameters,
             commandType: CommandType.StoredProcedure,
             cancellationToken: cancellationToken);
 
-        var result =
-            await conn.QuerySingleOrDefaultAsync<Sale>(command);
+        var result = await conn.QuerySingleOrDefaultAsync<Sale>(command);
 
         if (result == null)
         {
-            throw new KeyNotFoundException(
-                $"Sale with Id {sale.Id} not found.");
+            throw new KeyNotFoundException($"Sale with Id {sale.Id} not found.");
         }
 
         return result;
     }
 
-
-    public async Task<Sale> DeleteSaleAsync(  long id,CancellationToken cancellationToken)
+    public async Task<Sale> DeleteSaleAsync(long id, CancellationToken cancellationToken)
     {
         using var conn = _factory.CreateDbConnection();
 
         var saleParameters = new DynamicParameters();
-
         saleParameters.Add("@Id", id);
 
         var getCommand = new CommandDefinition(
@@ -217,18 +149,14 @@ public class SaleRepository : ISaleRepository
             commandType: CommandType.StoredProcedure,
             cancellationToken: cancellationToken);
 
-        var sale =
-            await conn.QuerySingleOrDefaultAsync<Sale>(getCommand);
+        var sale = await conn.QuerySingleOrDefaultAsync<Sale>(getCommand);
 
         if (sale == null)
         {
-            throw new KeyNotFoundException(
-                $"Sale with Id {id} not found.");
+            throw new KeyNotFoundException($"Sale with Id {id} not found.");
         }
 
-
         var deleteParameters = new DynamicParameters();
-
         deleteParameters.Add("@Id", id);
 
         var deleteCommand = new CommandDefinition(
@@ -237,13 +165,11 @@ public class SaleRepository : ISaleRepository
             commandType: CommandType.StoredProcedure,
             cancellationToken: cancellationToken);
 
-        var affectedRows =
-            await conn.ExecuteAsync(deleteCommand);
+        var affectedRows = await conn.ExecuteAsync(deleteCommand);
 
         if (affectedRows == 0)
         {
-            throw new Exception(
-                $"Sale with Id {id} could not be deleted.");
+            throw new Exception($"Sale with Id {id} could not be deleted.");
         }
 
         return sale;

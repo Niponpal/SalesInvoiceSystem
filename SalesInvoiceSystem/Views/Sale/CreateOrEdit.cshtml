@@ -1,208 +1,96 @@
 ﻿@model SalesInvoiceSystem.Models.Sale
-
 @{
-    ViewData["Title"] = Model.Id == 0
-        ? "Create Invoice"
-        : "Edit Invoice";
-
+    ViewData["Title"] = Model.Id == 0 ? "Create Invoice" : "Edit Invoice";
     var products =
         ViewBag.Products as IEnumerable<SalesInvoiceSystem.Models.Product>
         ?? Enumerable.Empty<SalesInvoiceSystem.Models.Product>();
-
     var customers =
         ViewBag.Customers as IEnumerable<SalesInvoiceSystem.Models.Customer>
         ?? Enumerable.Empty<SalesInvoiceSystem.Models.Customer>();
 }
-
 <div class="container mt-4">
-
     <div class="card shadow">
-
-        <!-- =========================================
-             HEADER
-        ========================================== -->
-
         <div class="card-header bg-primary text-white">
-
             <h3 class="mb-0">
-
-                @(Model.Id == 0
-                                ? "Create Invoice"
-                                : "Edit Invoice")
-
+                @(Model.Id == 0 ? "Create Invoice" : "Edit Invoice")
             </h3>
-
         </div>
-
-
-        <!-- =========================================
-             FORM
-        ========================================== -->
-
         <div class="card-body">
-
-            <form asp-action="CreateOrEdit"
-                  method="post"
-                  id="saleForm">
-
+            <form asp-action="CreateOrEdit" method="post" id="saleForm">
                 @Html.AntiForgeryToken()
-
-
-                <!-- Hidden Id -->
-
-                <input type="hidden"
-                       asp-for="Id" />
-
-
-                <!-- =====================================
-                     VALIDATION
-                ====================================== -->
-
+                <input type="hidden" asp-for="Id" />
                 <div asp-validation-summary="ModelOnly"
                      class="text-danger mb-3">
                 </div>
-
-
-                <!-- =====================================
-                     INVOICE INFORMATION
-                ====================================== -->
-
                 <div class="row">
-
-                    <!-- Invoice Number -->
-
                     <div class="col-md-4 mb-3">
-
-                        <label asp-for="InvoiceNo"
-                               class="form-label">
-
+                        <label asp-for="InvoiceNo" class="form-label">
                             Invoice No
-
                         </label>
-
                         <input asp-for="InvoiceNo"
                                class="form-control"
                                readonly />
-
                         <span asp-validation-for="InvoiceNo"
                               class="text-danger">
                         </span>
-
                     </div>
-
-
-                    <!-- Customer -->
-
                     <div class="col-md-4 mb-3">
-
-                        <label asp-for="CustomerId"
-                               class="form-label">
-
+                        <label asp-for="CustomerId" class="form-label">
                             Customer
-
                         </label>
-
                         <select asp-for="CustomerId"
                                 class="form-select">
-
                             <option value="">
                                 -- Select Customer --
                             </option>
-
                             @foreach (var customer in customers)
                             {
                                 <option value="@customer.Id">
-
                                     @customer.CustomerName
-
                                 </option>
                             }
-
                         </select>
-
                         <span asp-validation-for="CustomerId"
                               class="text-danger">
                         </span>
-
                     </div>
-
-
-                    <!-- Sale Date -->
-
                     <div class="col-md-4 mb-3">
-
-                        <label asp-for="SaleDate"
-                               class="form-label">
-
+                        <label asp-for="SaleDate" class="form-label">
                             Sale Date
-
                         </label>
-
                         <input asp-for="SaleDate"
                                type="datetime-local"
                                class="form-control" />
-
                         <span asp-validation-for="SaleDate"
                               class="text-danger">
                         </span>
-
                     </div>
-
                 </div>
-
-
                 <hr />
-
-
-                <!-- =====================================
-                     PRODUCT FORMS
-                ====================================== -->
-
                 <div class="d-flex justify-content-between align-items-center mb-3">
-
-                    <h4>
-                        Add Product
-                    </h4>
-
+                    <h4>Add Product</h4>
                     <button type="button"
                             id="addProduct"
                             class="btn btn-primary">
-
                         + Add Product
-
                     </button>
-
                 </div>
-
-
                 <div id="productForms">
-
-
-                    @if (Model.SaleDetails != null &&
-                                        Model.SaleDetails.Any())
+                    @if (Model.SaleDetails != null && Model.SaleDetails.Any())
                     {
                         var index = 0;
-
                         foreach (var detail in Model.SaleDetails)
                         {
                             <div class="product-form border rounded p-3 mb-3">
-
                                 <div class="row align-items-end">
-
-                                    <!-- Product -->
-
                                     <div class="col-md-5">
-
                                         <label class="form-label">
                                             Product
                                         </label>
-
                                         <select class="form-select product-select">
-
                                             <option value="">
                                                 -- Select Product --
                                             </option>
-
                                             @foreach (var product in products)
                                             {
                                                 if (product.Id == detail.ProductId)
@@ -211,10 +99,7 @@
                                                             data-price="@product.Price"
                                                             data-stock="@product.Stock"
                                                             selected>
-
-                                                        @product.ProductName
-                                                        - Stock: @product.Stock
-
+                                                        @product.ProductName - Stock: @product.Stock
                                                     </option>
                                                 }
                                                 else
@@ -222,1243 +107,393 @@
                                                     <option value="@product.Id"
                                                             data-price="@product.Price"
                                                             data-stock="@product.Stock">
-
-                                                        @product.ProductName
-                                                        - Stock: @product.Stock
-
+                                                        @product.ProductName - Stock: @product.Stock
                                                     </option>
                                                 }
                                             }
-
                                         </select>
-
                                     </div>
-
-
-                                    <!-- Quantity -->
-
                                     <div class="col-md-2">
-
                                         <label class="form-label">
                                             Quantity
                                         </label>
-
                                         <input type="number"
                                                class="form-control quantity-input"
                                                value="@detail.Quantity"
                                                min="1" />
-
                                     </div>
-
-
-                                    <!-- Unit Price -->
-
                                     <div class="col-md-2">
-
                                         <label class="form-label">
                                             Unit Price
                                         </label>
-
                                         <input type="number"
                                                class="form-control unit-price-input"
                                                value="@detail.UnitPrice"
                                                step="0.01"
                                                readonly />
-
                                     </div>
-
-
-                                    <!-- Total -->
-
                                     <div class="col-md-2">
-
                                         <label class="form-label">
                                             Total
                                         </label>
-
                                         <input type="number"
                                                class="form-control total-price-input"
                                                value="@detail.TotalPrice"
                                                step="0.01"
                                                readonly />
-
                                     </div>
-
-
-                                    <!-- Remove -->
-
                                     <div class="col-md-1">
-
                                         <button type="button"
                                                 class="btn btn-danger remove-product">
-
                                             X
-
                                         </button>
-
                                     </div>
-
                                 </div>
-
                             </div>
-
                             index++;
                         }
                     }
                     else
                     {
-                        <!-- =================================
-                             FIRST PRODUCT FORM
-                        ================================== -->
-
                         <div class="product-form border rounded p-3 mb-3">
-
                             <div class="row align-items-end">
-
-                                <!-- Product -->
-
                                 <div class="col-md-5">
-
                                     <label class="form-label">
                                         Product
                                     </label>
-
                                     <select class="form-select product-select">
-
                                         <option value="">
                                             -- Select Product --
                                         </option>
-
                                         @foreach (var product in products)
                                         {
                                             <option value="@product.Id"
                                                     data-price="@product.Price"
                                                     data-stock="@product.Stock">
-
-                                                @product.ProductName
-                                                - Stock: @product.Stock
-
+                                                @product.ProductName - Stock: @product.Stock
                                             </option>
                                         }
-
                                     </select>
-
                                 </div>
-
-
-                                <!-- Quantity -->
-
                                 <div class="col-md-2">
-
                                     <label class="form-label">
                                         Quantity
                                     </label>
-
                                     <input type="number"
                                            class="form-control quantity-input"
                                            value="1"
                                            min="1" />
-
                                 </div>
-
-
-                                <!-- Unit Price -->
-
                                 <div class="col-md-2">
-
                                     <label class="form-label">
                                         Unit Price
                                     </label>
-
                                     <input type="number"
                                            class="form-control unit-price-input"
                                            step="0.01"
                                            readonly />
-
                                 </div>
-
-
-                                <!-- Total -->
-
                                 <div class="col-md-2">
-
                                     <label class="form-label">
                                         Total
                                     </label>
-
                                     <input type="number"
                                            class="form-control total-price-input"
                                            step="0.01"
                                            readonly />
-
                                 </div>
-
-
-                                <!-- Remove -->
-
                                 <div class="col-md-1">
-
                                     <button type="button"
                                             class="btn btn-danger remove-product">
-
                                         X
-
                                     </button>
-
                                 </div>
-
                             </div>
-
                         </div>
                     }
-
                 </div>
-
-
-                <!-- =====================================
-                     GRAND TOTAL
-                ====================================== -->
-
                 <div class="row justify-content-end">
-
                     <div class="col-md-4">
-
                         <label class="form-label fw-bold">
-
                             Grand Total
-
                         </label>
-
                         <input type="text"
                                id="grandTotal"
                                class="form-control form-control-lg fw-bold"
                                value="0.00"
                                readonly />
-
                     </div>
-
                 </div>
-
-
-                <!-- =====================================
-                     HIDDEN TOTAL AMOUNT
-                ====================================== -->
-
                 <input type="hidden"
                        asp-for="TotalAmount"
                        id="totalAmount" />
-
-
                 <hr />
-
-
-                <!-- =====================================
-                     BUTTONS
-                ====================================== -->
-
                 <div class="d-flex justify-content-end gap-2">
-
                     <a asp-action="Index"
                        class="btn btn-secondary">
-
                         Cancel
-
                     </a>
-
                     <button type="submit"
                             class="btn btn-success">
-
-                        @(Model.Id == 0
-                                                ? "Save Invoice"
-                                                : "Update Invoice")
-
+                        @(Model.Id == 0 ? "Save Invoice" : "Update Invoice")
                     </button>
-
                 </div>
-
             </form>
-
         </div>
-
     </div>
-
 </div>
-
-
 @section Scripts {
-
     <partial name="_ValidationScriptsPartial" />
-
-
     <script>
-
-        // =========================================================
-        // GET PRODUCT FORMS CONTAINER
-        // =========================================================
-
-        const productForms =
-            document.getElementById("productForms");
-
-
-        // =========================================================
-        // ADD PRODUCT
-        // =========================================================
-
-        document
-            .getElementById("addProduct")
-            .addEventListener("click", function () {
-
-                // Get first product form
-
-                const firstForm =
-                    document.querySelector(".product-form");
-
-
-                // Clone entire form
-
-                const newForm =
-                    firstForm.cloneNode(true);
-
-
-                // =================================================
-                // RESET PRODUCT
-                // =================================================
-
-                const productSelect =
-                    newForm.querySelector(
-                        ".product-select"
-                    );
-
-                productSelect.value = "";
-
-
-                // =================================================
-                // RESET QUANTITY
-                // =================================================
-
-                const quantityInput =
-                    newForm.querySelector(
-                        ".quantity-input"
-                    );
-
-                quantityInput.value = 1;
-
-
-                // =================================================
-                // RESET UNIT PRICE
-                // =================================================
-
-                const unitPriceInput =
-                    newForm.querySelector(
-                        ".unit-price-input"
-                    );
-
-                unitPriceInput.value = "";
-
-
-                // =================================================
-                // RESET TOTAL
-                // =================================================
-
-                const totalPriceInput =
-                    newForm.querySelector(
-                        ".total-price-input"
-                    );
-
-                totalPriceInput.value = "";
-
-
-                // =================================================
-                // REMOVE VALIDATION STYLE
-                // =================================================
-
-                productSelect.classList.remove(
-                    "is-invalid"
-                );
-
-                quantityInput.classList.remove(
-                    "is-invalid"
-                );
-
-
-                // =================================================
-                // REMOVE OLD STOCK ERROR
-                // =================================================
-
-                const oldError =
-                    newForm.querySelector(
-                        ".stock-error"
-                    );
-
-                if (oldError) {
-                    oldError.remove();
-                }
-
-
-                // =================================================
-                // ADD NEW FORM
-                // =================================================
-
-                productForms.appendChild(newForm);
-
-
-                calculateGrandTotal();
-
-            });
-
-
-        // =========================================================
-        // PRODUCT CHANGE
-        // =========================================================
-
-        productForms.addEventListener(
-            "change",
-            function (event) {
-
-                if (
-                    event.target.classList.contains(
-                        "product-select"
-                    )
-                ) {
-
-                    const select =
-                        event.target;
-
-
-                    const selectedOption =
-                        select.options[
-                            select.selectedIndex
-                        ];
-
-
-                    const price =
-                        selectedOption.getAttribute(
-                            "data-price"
-                        );
-
-
-                    const form =
-                        select.closest(
-                            ".product-form"
-                        );
-
-
-                    const unitPrice =
-                        form.querySelector(
-                            ".unit-price-input"
-                        );
-
-
-                    const quantity =
-                        form.querySelector(
-                            ".quantity-input"
-                        );
-
-
-                    // Set price
-
-                    unitPrice.value =
-                        price || "";
-
-
-                    // Reset quantity
-
-                    quantity.value = 1;
-
-
-                    // Remove old stock error
-
-                    removeStockError(form);
-
-
-                    // Remove invalid classes
-
-                    select.classList.remove(
-                        "is-invalid"
-                    );
-
-                    quantity.classList.remove(
-                        "is-invalid"
-                    );
-
-
-                    // Check stock
-
-                    checkStock(form);
-
-
-                    // Calculate total
-
-                    calculateFormTotal(form);
-
-                }
-
+        const productForms = document.getElementById("productForms");
+        document.getElementById("addProduct").addEventListener("click", function () {
+            const firstForm = document.querySelector(".product-form");
+            const newForm = firstForm.cloneNode(true);
+            const productSelect = newForm.querySelector(".product-select");
+            productSelect.value = "";
+            const quantityInput = newForm.querySelector(".quantity-input");
+            quantityInput.value = 1;
+            const unitPriceInput = newForm.querySelector(".unit-price-input");
+            unitPriceInput.value = "";
+            const totalPriceInput = newForm.querySelector(".total-price-input");
+            totalPriceInput.value = "";
+            productSelect.classList.remove("is-invalid");
+            quantityInput.classList.remove("is-invalid");
+            const oldError = newForm.querySelector(".stock-error");
+            if (oldError) {
+                oldError.remove();
             }
-        );
-
-
-        // =========================================================
-        // QUANTITY CHANGE
-        // =========================================================
-
-        productForms.addEventListener(
-            "input",
-            function (event) {
-
-                if (
-                    event.target.classList.contains(
-                        "quantity-input"
-                    )
-                ) {
-
-                    const form =
-                        event.target.closest(
-                            ".product-form"
-                        );
-
-
-                    // Check stock
-
-                    checkStock(form);
-
-
-                    // Calculate total
-
-                    calculateFormTotal(form);
-
-                }
-
-            }
-        );
-
-
-        // =========================================================
-        // REMOVE PRODUCT FORM
-        // =========================================================
-
-        productForms.addEventListener(
-            "click",
-            function (event) {
-
-                if (
-                    event.target.classList.contains(
-                        "remove-product"
-                    )
-                ) {
-
-                    const forms =
-                        document.querySelectorAll(
-                            ".product-form"
-                        );
-
-
-                    // Don't remove last form
-
-                    if (forms.length === 1) {
-
-                        alert(
-                            "At least one product is required."
-                        );
-
-                        return;
-                    }
-
-
-                    const form =
-                        event.target.closest(
-                            ".product-form"
-                        );
-
-
-                    form.remove();
-
-
-                    // Recheck all products
-
-                    checkAllProductsStock();
-
-
-                    // Recalculate grand total
-
-                    calculateGrandTotal();
-
-                }
-
-            }
-        );
-
-
-        // =========================================================
-        // CHECK PRODUCT STOCK
-        // =========================================================
-
-        function checkStock(form) {
-
-            const productSelect =
-                form.querySelector(
-                    ".product-select"
-                );
-
-
-            const quantityInput =
-                form.querySelector(
-                    ".quantity-input"
-                );
-
-
-            const selectedOption =
-                productSelect.options[
-                    productSelect.selectedIndex
-                ];
-
-
-            // No product selected
-
-            if (
-                !productSelect.value ||
-                !selectedOption
-            ) {
-
+            productForms.appendChild(newForm);
+            calculateGrandTotal();
+        });
+        productForms.addEventListener("change", function (event) {
+            if (event.target.classList.contains("product-select")) {
+                const select = event.target;
+                const selectedOption = select.options[select.selectedIndex];
+                const price = selectedOption.getAttribute("data-price");
+                const form = select.closest(".product-form");
+                const unitPrice = form.querySelector(".unit-price-input");
+                const quantity = form.querySelector(".quantity-input");
+                unitPrice.value = price || "";
+                quantity.value = 1;
                 removeStockError(form);
-
-                quantityInput.classList.remove(
-                    "is-invalid"
-                );
-
+                select.classList.remove("is-invalid");
+                quantity.classList.remove("is-invalid");
+                checkStock(form);
+                calculateFormTotal(form);
+            }
+        });
+        productForms.addEventListener("input", function (event) {
+            if (event.target.classList.contains("quantity-input")) {
+                const form = event.target.closest(".product-form");
+                checkStock(form);
+                calculateFormTotal(form);
+            }
+        });
+        productForms.addEventListener("click", function (event) {
+            if (event.target.classList.contains("remove-product")) {
+                const forms = document.querySelectorAll(".product-form");
+                if (forms.length === 1) {
+                    alert("At least one product is required.");
+                    return;
+                }
+                const form = event.target.closest(".product-form");
+                form.remove();
+                checkAllProductsStock();
+                calculateGrandTotal();
+            }
+        });
+        function checkStock(form) {
+            const productSelect = form.querySelector(".product-select");
+            const quantityInput = form.querySelector(".quantity-input");
+            const selectedOption = productSelect.options[productSelect.selectedIndex];
+            if (!productSelect.value || !selectedOption) {
+                removeStockError(form);
+                quantityInput.classList.remove("is-invalid");
                 return true;
             }
-
-
-            // =====================================================
-            // GET AVAILABLE STOCK
-            // =====================================================
-
-            const stock =
-                parseInt(
-                    selectedOption.getAttribute(
-                        "data-stock"
-                    )
-                ) || 0;
-
-
-            // =====================================================
-            // GET CURRENT QUANTITY
-            // =====================================================
-
-            const quantity =
-                parseInt(
-                    quantityInput.value
-                ) || 0;
-
-
-            // =====================================================
-            // CHECK CURRENT FORM QUANTITY
-            // =====================================================
-
+            const stock = parseInt(selectedOption.getAttribute("data-stock")) || 0;
+            const quantity = parseInt(quantityInput.value) || 0;
             if (quantity > stock) {
-
                 showStockError(
                     form,
                     `Only ${stock} item(s) available in stock.`
                 );
-
-
-                quantityInput.classList.add(
-                    "is-invalid"
-                );
-
-
+                quantityInput.classList.add("is-invalid");
                 return false;
             }
-
-
-            // =====================================================
-            // CHECK TOTAL QUANTITY OF SAME PRODUCT
-            // =====================================================
-
-            const productId =
-                productSelect.value;
-
-
+            const productId = productSelect.value;
             let totalQuantity = 0;
-
-
-            document
-                .querySelectorAll(
-                    ".product-form"
-                )
+            document.querySelectorAll(".product-form")
                 .forEach(function (otherForm) {
-
                     const otherSelect =
-                        otherForm.querySelector(
-                            ".product-select"
-                        );
-
-
+                        otherForm.querySelector(".product-select");
                     const otherQuantity =
-                        otherForm.querySelector(
-                            ".quantity-input"
-                        );
-
-
-                    if (
-                        otherSelect.value ===
-                        productId
-                    ) {
-
+                        otherForm.querySelector(".quantity-input");
+                    if (otherSelect.value === productId) {
                         totalQuantity +=
-                            parseInt(
-                                otherQuantity.value
-                            ) || 0;
-
+                            parseInt(otherQuantity.value) || 0;
                     }
-
                 });
-
-
-            // =====================================================
-            // CHECK COMBINED QUANTITY
-            // =====================================================
-
             if (totalQuantity > stock) {
-
                 showStockError(
                     form,
                     `Total quantity for this product is ${totalQuantity}, but only ${stock} item(s) are available.`
                 );
-
-
-                quantityInput.classList.add(
-                    "is-invalid"
-                );
-
-
+                quantityInput.classList.add("is-invalid");
                 return false;
             }
-
-
-            // =====================================================
-            // STOCK IS VALID
-            // =====================================================
-
             removeStockError(form);
-
-
-            quantityInput.classList.remove(
-                "is-invalid"
-            );
-
-
+            quantityInput.classList.remove("is-invalid");
             return true;
-
         }
-
-
-        // =========================================================
-        // CHECK ALL PRODUCT STOCK
-        // =========================================================
-
         function checkAllProductsStock() {
-
             let valid = true;
-
-
-            document
-                .querySelectorAll(
-                    ".product-form"
-                )
+            document.querySelectorAll(".product-form")
                 .forEach(function (form) {
-
-                    const result =
-                        checkStock(form);
-
-
+                    const result = checkStock(form);
                     if (!result) {
                         valid = false;
                     }
-
                 });
-
-
             return valid;
-
         }
-
-
-        // =========================================================
-        // SHOW STOCK ERROR
-        // =========================================================
-
-        function showStockError(
-            form,
-            message
-        ) {
-
-            // Remove old error first
-
+        function showStockError(form, message) {
             removeStockError(form);
-
-
-            const error =
-                document.createElement(
-                    "div"
-                );
-
-
-            error.className =
-                "stock-error text-danger mt-2";
-
-
-            error.innerHTML =
-                `<strong>${message}</strong>`;
-
-
+            const error = document.createElement("div");
+            error.className = "stock-error text-danger mt-2";
+            error.innerHTML = `<strong>${message}</strong>`;
             form.appendChild(error);
-
         }
-
-
-        // =========================================================
-        // REMOVE STOCK ERROR
-        // =========================================================
-
         function removeStockError(form) {
-
-            const error =
-                form.querySelector(
-                    ".stock-error"
-                );
-
-
+            const error = form.querySelector(".stock-error");
             if (error) {
                 error.remove();
             }
-
         }
-
-
-        // =========================================================
-        // CALCULATE FORM TOTAL
-        // =========================================================
-
         function calculateFormTotal(form) {
-
             const quantity =
                 parseFloat(
-                    form.querySelector(
-                        ".quantity-input"
-                    ).value
+                    form.querySelector(".quantity-input").value
                 ) || 0;
-
-
             const unitPrice =
                 parseFloat(
-                    form.querySelector(
-                        ".unit-price-input"
-                    ).value
+                    form.querySelector(".unit-price-input").value
                 ) || 0;
-
-
-            const total =
-                quantity * unitPrice;
-
-
-            form.querySelector(
-                ".total-price-input"
-            ).value =
+            const total = quantity * unitPrice;
+            form.querySelector(".total-price-input").value =
                 total.toFixed(2);
-
-
             calculateGrandTotal();
-
         }
-
-
-        // =========================================================
-        // CALCULATE GRAND TOTAL
-        // =========================================================
-
         function calculateGrandTotal() {
-
             let grandTotal = 0;
-
-
-            const forms =
-                document.querySelectorAll(
-                    ".product-form"
-                );
-
-
+            const forms = document.querySelectorAll(".product-form");
             forms.forEach(function (form) {
-
                 const quantity =
                     parseFloat(
-                        form.querySelector(
-                            ".quantity-input"
-                        ).value
+                        form.querySelector(".quantity-input").value
                     ) || 0;
-
-
                 const unitPrice =
                     parseFloat(
-                        form.querySelector(
-                            ".unit-price-input"
-                        ).value
+                        form.querySelector(".unit-price-input").value
                     ) || 0;
-
-
-                grandTotal +=
-                    quantity * unitPrice;
-
+                grandTotal += quantity * unitPrice;
             });
-
-
-            document.getElementById(
-                "grandTotal"
-            ).value =
+            document.getElementById("grandTotal").value =
                 grandTotal.toFixed(2);
-
-
-            document.getElementById(
-                "totalAmount"
-            ).value =
+            document.getElementById("totalAmount").value =
                 grandTotal.toFixed(2);
-
         }
-
-
-        // =========================================================
-        // FORM SUBMIT
-        // =========================================================
-
-        document
-            .getElementById("saleForm")
-            .addEventListener(
-                "submit",
-                function (event) {
-
-
-                    // =================================================
-                    // FIRST CHECK STOCK
-                    // =================================================
-
-                    const stockValid =
-                        checkAllProductsStock();
-
-
-                    if (!stockValid) {
-
-                        event.preventDefault();
-
-
-                        alert(
-                            "One or more products do not have enough stock."
-                        );
-
-
-                        return;
-
-                    }
-
-
-                    // =================================================
-                    // GET ALL FORMS
-                    // =================================================
-
-                    const forms =
-                        document.querySelectorAll(
-                            ".product-form"
-                        );
-
-
-                    // =================================================
-                    // REMOVE OLD HIDDEN INPUTS
-                    // =================================================
-
-                    document
-                        .querySelectorAll(
-                            ".sale-detail-hidden"
-                        )
-                        .forEach(function (input) {
-
-                            input.remove();
-
-                        });
-
-
-                    let index = 0;
-
-                    let valid = true;
-
-
-                    // =================================================
-                    // LOOP THROUGH PRODUCT FORMS
-                    // =================================================
-
-                    forms.forEach(function (form) {
-
-
-                        const productSelect =
-                            form.querySelector(
-                                ".product-select"
-                            );
-
-
-                        const quantityInput =
-                            form.querySelector(
-                                ".quantity-input"
-                            );
-
-
-                        const unitPriceInput =
-                            form.querySelector(
-                                ".unit-price-input"
-                            );
-
-
-                        const totalPriceInput =
-                            form.querySelector(
-                                ".total-price-input"
-                            );
-
-
-                        // =================================================
-                        // GET VALUES
-                        // =================================================
-
-                        const productId =
-                            productSelect.value;
-
-
-                        const quantity =
-                            parseInt(
-                                quantityInput.value
-                            ) || 0;
-
-
-                        const unitPrice =
-                            parseFloat(
-                                unitPriceInput.value
-                            ) || 0;
-
-
-                        const totalPrice =
-                            quantity * unitPrice;
-
-
-                        // =================================================
-                        // PRODUCT VALIDATION
-                        // =================================================
-
-                        if (!productId) {
-
-                            valid = false;
-
-
-                            productSelect.classList.add(
-                                "is-invalid"
-                            );
-
-                        }
-                        else {
-
-                            productSelect.classList.remove(
-                                "is-invalid"
-                            );
-
-                        }
-
-
-                        // =================================================
-                        // QUANTITY VALIDATION
-                        // =================================================
-
-                        if (quantity <= 0) {
-
-                            valid = false;
-
-
-                            quantityInput.classList.add(
-                                "is-invalid"
-                            );
-
-                        }
-                        else {
-
-                            quantityInput.classList.remove(
-                                "is-invalid"
-                            );
-
-                        }
-
-
-                        // =================================================
-                        // PRICE VALIDATION
-                        // =================================================
-
-                        if (unitPrice <= 0) {
-
-                            valid = false;
-
-                        }
-
-
-                        // =================================================
-                        // UPDATE TOTAL
-                        // =================================================
-
-                        totalPriceInput.value =
-                            totalPrice.toFixed(2);
-
-
-                        // =================================================
-                        // HIDDEN ProductId
-                        // =================================================
-
-                        addHiddenInput(
-                            `SaleDetails[${index}].ProductId`,
-                            productId
-                        );
-
-
-                        // =================================================
-                        // HIDDEN Quantity
-                        // =================================================
-
-                        addHiddenInput(
-                            `SaleDetails[${index}].Quantity`,
-                            quantity
-                        );
-
-
-                        // =================================================
-                        // HIDDEN UnitPrice
-                        // =================================================
-
-                        addHiddenInput(
-                            `SaleDetails[${index}].UnitPrice`,
-                            unitPrice.toFixed(2)
-                        );
-
-
-                        // =================================================
-                        // HIDDEN TotalPrice
-                        // =================================================
-
-                        addHiddenInput(
-                            `SaleDetails[${index}].TotalPrice`,
-                            totalPrice.toFixed(2)
-                        );
-
-
-                        index++;
-
-                    });
-
-
-                    // =================================================
-                    // NO PRODUCT FORM
-                    // =================================================
-
-                    if (forms.length === 0) {
-
-                        valid = false;
-
-
-                        alert(
-                            "Please add at least one product."
-                        );
-
-                    }
-
-
-                    // =================================================
-                    // STOP SUBMIT IF INVALID
-                    // =================================================
-
-                    if (!valid) {
-
-                        event.preventDefault();
-
-
-                        alert(
-                            "Please select product and enter valid quantity."
-                        );
-
-
-                        return;
-
-                    }
-
-
-                    // =================================================
-                    // FINAL GRAND TOTAL
-                    // =================================================
-
-                    calculateGrandTotal();
-
+        document.getElementById("saleForm").addEventListener("submit", function (event) {
+            const stockValid = checkAllProductsStock();
+            if (!stockValid) {
+                event.preventDefault();
+                alert("One or more products do not have enough stock.");
+                return;
+            }
+            const forms = document.querySelectorAll(".product-form");
+            document.querySelectorAll(".sale-detail-hidden")
+                .forEach(function (input) {
+                    input.remove();
+                });
+            let index = 0;
+            let valid = true;
+            forms.forEach(function (form) {
+                const productSelect =
+                    form.querySelector(".product-select");
+                const quantityInput =
+                    form.querySelector(".quantity-input");
+                const unitPriceInput =
+                    form.querySelector(".unit-price-input");
+                const totalPriceInput =
+                    form.querySelector(".total-price-input");
+                const productId = productSelect.value;
+                const quantity =
+                    parseInt(quantityInput.value) || 0;
+                const unitPrice =
+                    parseFloat(unitPriceInput.value) || 0;
+                const totalPrice = quantity * unitPrice;
+                if (!productId) {
+                    valid = false;
+                    productSelect.classList.add("is-invalid");
                 }
-            );
-
-
-        // =========================================================
-        // ADD HIDDEN INPUT
-        // =========================================================
-
-        function addHiddenInput(
-            name,
-            value
-        ) {
-
-            const input =
-                document.createElement(
-                    "input"
+                else {
+                    productSelect.classList.remove("is-invalid");
+                }
+                if (quantity <= 0) {
+                    valid = false;
+                    quantityInput.classList.add("is-invalid");
+                }
+                else {
+                    quantityInput.classList.remove("is-invalid");
+                }
+                if (unitPrice <= 0) {
+                    valid = false;
+                }
+                totalPriceInput.value = totalPrice.toFixed(2);
+                addHiddenInput(
+                    `SaleDetails[${index}].ProductId`,
+                    productId
                 );
-
-
-            input.type = "hidden";
-
-
-            input.name = name;
-
-
-            input.value = value;
-
-
-            input.classList.add(
-                "sale-detail-hidden"
-            );
-
-
-            document
-                .getElementById("saleForm")
-                .appendChild(input);
-
-        }
-
-
-        // =========================================================
-        // INITIAL CALCULATION
-        // =========================================================
-
-        document
-            .querySelectorAll(
-                ".product-form"
-            )
-            .forEach(function (form) {
-
-                calculateFormTotal(form);
-
-                checkStock(form);
-
+                addHiddenInput(
+                    `SaleDetails[${index}].Quantity`,
+                    quantity
+                );
+                addHiddenInput(
+                    `SaleDetails[${index}].UnitPrice`,
+                    unitPrice.toFixed(2)
+                );
+                addHiddenInput(
+                    `SaleDetails[${index}].TotalPrice`,
+                    totalPrice.toFixed(2)
+                );
+                index++;
             });
-
-
-        // =========================================================
-        // INITIAL STOCK CHECK
-        // =========================================================
-
+            if (forms.length === 0) {
+                valid = false;
+                alert("Please add at least one product.");
+            }
+            if (!valid) {
+                event.preventDefault();
+                alert("Please select product and enter valid quantity.");
+                return;
+            }
+            calculateGrandTotal();
+        });
+        function addHiddenInput(name, value) {
+            const input = document.createElement("input");
+            input.type = "hidden";
+            input.name = name;
+            input.value = value;
+            input.classList.add("sale-detail-hidden");
+            document.getElementById("saleForm")
+                .appendChild(input);
+        }
+        document.querySelectorAll(".product-form")
+            .forEach(function (form) {
+                calculateFormTotal(form);
+                checkStock(form);
+            });
         checkAllProductsStock();
-
     </script>
 }
