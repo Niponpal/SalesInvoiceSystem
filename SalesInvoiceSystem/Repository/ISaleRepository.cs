@@ -78,18 +78,13 @@ public class SaleRepository : ISaleRepository
         var reportData = sale.SaleDetails
             .Select(detail => new SaleInvoiceReportDto
             {
-                SaleId = sale.Id,
+                
                 InvoiceNo = sale.InvoiceNo,
                 SaleDate = sale.SaleDate,
-
-                CustomerId = sale.CustomerId,
                 CustomerName = sale.Customer?.CustomerName ?? "",
                 CustomerPhone = sale.Customer?.Phone ?? "",
                 CustomerAddress = sale.Customer?.Address ?? "",
-
-                ProductId = detail.ProductId,
                 ProductName = detail.Product?.ProductName ?? "",
-
                 Quantity = detail.Quantity,
                 UnitPrice = detail.UnitPrice,
                 TotalPrice = detail.TotalPrice,

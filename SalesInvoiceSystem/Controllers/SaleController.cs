@@ -213,7 +213,8 @@ namespace SalesInvoiceSystem.Controllers
         [HttpGet]
         public async Task<IActionResult> Print(long id, CancellationToken cancellationToken)
         {
-            if (id <= 0) return BadRequest("Invalid sale id.");
+            if (id <= 0)
+                return BadRequest("Invalid sale id.");
 
             var reportData = await _saleRepository.GetSaleInvoiceReportAsync(id, cancellationToken);
             if (reportData == null || reportData.Count == 0)
@@ -225,26 +226,47 @@ namespace SalesInvoiceSystem.Controllers
 
             try
             {
-                using var report = new LocalReport();
-                report.ReportPath = reportPath; // important
+                using var report = new LocalReport
+                {
+                    ReportPath = reportPath
+                };
 
                 report.DataSources.Clear();
-                report.DataSources.Add(new ReportDataSource("SaleInvoiceDataSet", reportData));
-
-                // Optional: force processing context
+                report.DataSources.Add(new ReportDataSource("InvoiceData", reportData));
                 report.Refresh();
 
-                var pdf = report.Render("PDF");
+                string mimeType, encoding, fileNameExtension;
+                string[] streams;
+                Warning[] warnings;
+
+                var pdfBytes = report.Render(
+                    "PDF",
+                    null,
+                    out mimeType,
+                    out encoding,
+                    out fileNameExtension,
+                    out streams,
+                    out warnings
+                );
+
                 var invoiceNo = reportData.FirstOrDefault()?.InvoiceNo ?? $"Invoice_{id}";
-                return File(pdf, "application/pdf", $"{invoiceNo}.pdf");
+                return File(pdfBytes, "application/pdf", $"{invoiceNo}.pdf");
+            }
+            catch (LocalProcessingException lpex)
+            {
+                return StatusCode(500,
+                    "Report generation failed.\n" +
+                    $"Path: {reportPath}\n" +
+                    $"Message: {lpex.Message}\n" +
+                    $"Inner: {lpex.InnerException?.Message}\n" +
+                    $"Inner2: {lpex.InnerException?.InnerException?.Message}");
             }
             catch (Exception ex)
             {
                 return StatusCode(500,
-                    $"Report generation failed.\n" +
+                    "Unexpected error while generating report.\n" +
                     $"Path: {reportPath}\n" +
-                    $"Message: {ex.Message}\n" +
-                    $"Inner: {ex.InnerException?.Message}");
+                    $"Message: {ex.Message}");
             }
         }
 

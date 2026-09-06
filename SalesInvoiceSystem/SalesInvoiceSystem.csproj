@@ -27,11 +27,4 @@
 		<PackageReference Include="ServiceStack.Common" Version="10.1.4" />
 	</ItemGroup>
 
-	<ItemGroup>
-		<Content Include="Report\**\*">
-			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-			<CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
-		</Content>
-	</ItemGroup>
-
 </Project>
