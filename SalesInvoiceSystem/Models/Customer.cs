@@ -8,9 +8,9 @@ namespace SalesInvoiceSystem.Models
 
         [Required(ErrorMessage = "Customer name is required.")]
         [StringLength(100, MinimumLength = 2,
-                 ErrorMessage = "Customer name must be between 2 and 100 characters.")]
+          ErrorMessage = "Customer name must be between 2 and 100 characters.")]
         [RegularExpression(@"^[a-zA-Z\s.'-]+$",
-                 ErrorMessage = "Customer name can contain only letters, spaces, dots, apostrophes and hyphens.")]
+          ErrorMessage = "Customer name can contain only letters, spaces, dots, apostrophes and hyphens.")]
         public string CustomerName { get; set; }
 
         [Required(ErrorMessage = "Phone number is required.")]
@@ -31,7 +31,6 @@ namespace SalesInvoiceSystem.Models
 
         public DateTime CreatedDate { get; set; }
 
-        // Navigation Property
         public ICollection<Sale>? Sales { get; set; }
     }
 }

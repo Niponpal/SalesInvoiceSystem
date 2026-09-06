@@ -18,10 +18,8 @@ namespace SalesInvoiceSystem.Models
         [Column(TypeName = "decimal(18,2)")]
         public decimal TotalAmount { get; set; }
 
-        // Navigation Property
         [ForeignKey("CustomerId")]
         public Customer? Customer { get; set; }
-
    
         public ICollection<SaleDetail> SaleDetails { get; set; }
            = new List<SaleDetail>();

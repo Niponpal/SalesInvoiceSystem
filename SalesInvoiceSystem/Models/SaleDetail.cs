@@ -18,7 +18,6 @@ namespace SalesInvoiceSystem.Models
         [Column(TypeName = "decimal(18,2)")]
         public decimal TotalPrice { get; set; }
 
-        // Navigation Properties
         [ForeignKey("SaleId")]
         public Sale Sale { get; set; }
 

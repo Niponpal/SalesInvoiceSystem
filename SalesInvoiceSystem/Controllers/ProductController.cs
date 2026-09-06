@@ -22,14 +22,12 @@ public class ProductController : Controller
         return View(products);
     }
 
-
     [HttpGet]
     public async Task<IActionResult> Details(long id,CancellationToken cancellationToken)
     {
         var product =await _productRepository.GetProductByIdAsync( id,cancellationToken);
         return View(product);
     }
-
 
     [HttpGet]
     public async Task<IActionResult> CreateOrEdit(long? id, CancellationToken cancellationToken)
@@ -73,7 +71,6 @@ public class ProductController : Controller
 
         return RedirectToAction(nameof(Index));
     }
-
 
 
     [HttpGet]

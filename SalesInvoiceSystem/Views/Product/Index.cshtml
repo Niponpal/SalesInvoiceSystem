@@ -8,7 +8,6 @@
 
 <div class="container mt-4">
 
-    <!-- Header -->
     <div class="d-flex justify-content-between align-items-center mb-4">
 
         <div>
@@ -26,7 +25,6 @@
     </div>
 
 
-    <!-- Success Message -->
     @if (TempData["SuccessMessage"] != null)
     {
         <div class="alert alert-success alert-dismissible fade show"
@@ -43,7 +41,6 @@
     }
 
 
-    <!-- Product Table -->
     <div class="card shadow">
 
         <div class="card-body">
@@ -78,8 +75,6 @@
                             @foreach (var item in Model)
                             {
                                 <tr>
-
-                                    <!-- Serial Number -->
                                     <td>
                                         @serial
                                     </td>
@@ -117,21 +112,18 @@
 
                                         <div class="d-flex gap-1">
 
-                                            <!-- Details -->
                                             <a asp-action="Details"
                                                asp-route-id="@item.Id"
                                                class="btn btn-sm btn-info">
                                                 Details
                                             </a>
 
-                                            <!-- Edit -->
                                             <a asp-action="CreateOrEdit"
                                                asp-route-id="@item.Id"
                                                class="btn btn-sm btn-warning">
                                                 Edit
                                             </a>
 
-                                            <!-- Delete -->
                                             <a asp-action="Delete"
                                                asp-route-id="@item.Id"
                                                class="btn btn-sm btn-danger">
@@ -155,7 +147,7 @@
             }
             else
             {
-                <!-- No Product -->
+              
                 <div class="text-center py-5">
 
                     <h4>No Products Found</h4>

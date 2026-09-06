@@ -18,9 +18,7 @@ public interface ISaleRepository
 
     Task<Sale> DeleteSaleAsync(long id, CancellationToken cancellationToken);
 
-    Task<List<SaleInvoiceReportDto>> GetSaleInvoiceReportAsync(
-    long id,
-    CancellationToken cancellationToken);
+    Task<List<SaleInvoiceReportDto>> GetSaleInvoiceReportAsync(long id, CancellationToken cancellationToken);
 }
 
 public class SaleRepository : ISaleRepository
@@ -49,7 +47,7 @@ public class SaleRepository : ISaleRepository
 
         using var multi = await conn.QueryMultipleAsync(command);
 
-        // Result 1: Sale
+      
         var sale = await multi.ReadSingleOrDefaultAsync<Sale>();
 
         if (sale == null)
@@ -58,11 +56,11 @@ public class SaleRepository : ISaleRepository
                 $"Sale with Id {id} not found.");
         }
 
-        // Result 2: Customer
+       
         sale.Customer =
             await multi.ReadSingleOrDefaultAsync<Customer>();
 
-        // Result 3: SaleDetails + Product
+       
         sale.SaleDetails = multi
             .Read<SaleDetail, Product, SaleDetail>(
                 (detail, product) =>
@@ -74,7 +72,7 @@ public class SaleRepository : ISaleRepository
             )
             .ToList();
 
-        // Convert to Report DTO
+       
         var reportData = sale.SaleDetails
             .Select(detail => new SaleInvoiceReportDto
             {

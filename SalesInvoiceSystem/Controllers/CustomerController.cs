@@ -22,7 +22,6 @@ public class CustomerController : Controller
     }
 
 
-
     [HttpGet]
     public async Task<IActionResult> Details(
         long id,
@@ -37,9 +36,7 @@ public class CustomerController : Controller
     }
 
     [HttpGet]
-    public async Task<IActionResult> CreateOrEdit(
-        long? id,
-        CancellationToken cancellationToken)
+    public async Task<IActionResult> CreateOrEdit( long? id,  CancellationToken cancellationToken)
     {
       
         if (id == null || id == 0)
@@ -70,8 +67,6 @@ public class CustomerController : Controller
             TempData["SuccessMessage"] = "Customer created successfully.";
         }
 
-
-
         else
         {
             await _customerRepository.UpdateCustomerAsync( customer, cancellationToken);
@@ -98,12 +93,9 @@ public class CustomerController : Controller
         long id,
         CancellationToken cancellationToken)
     {
-        await _customerRepository.DeleteCustomerAsync(
-            id,
-            cancellationToken);
+        await _customerRepository.DeleteCustomerAsync( id,cancellationToken);
 
-        TempData["SuccessMessage"] =
-            "Customer deleted successfully.";
+        TempData["SuccessMessage"] = "Customer deleted successfully.";
 
         return RedirectToAction(nameof(Index));
     }

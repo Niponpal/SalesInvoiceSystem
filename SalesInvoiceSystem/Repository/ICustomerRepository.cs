@@ -126,7 +126,7 @@ public class CustomerRepository : ICustomerRepository
     {
         using var conn = _factory.CreateDbConnection();
 
-        // First get customer
+       
         var customerParameters = new DynamicParameters();
 
         customerParameters.Add("@Id", id);
