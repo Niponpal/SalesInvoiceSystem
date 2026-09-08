@@ -29,11 +29,10 @@ public class SaleRepository : ISaleRepository
     {
         _factory = factory;
     }
-    public async Task<List<SaleInvoiceReportDto>> GetSaleInvoiceReportAsync(
-    long id,
-    CancellationToken cancellationToken)
+    public async Task<List<SaleInvoiceReportDto>> GetSaleInvoiceReportAsync(long id,  CancellationToken cancellationToken)
     {
         using var conn = _factory.CreateDbConnection();
+
 
         var parameters = new DynamicParameters();
         parameters.Add("@Id", id);

@@ -89,9 +89,7 @@ public class CustomerController : Controller
 
     [HttpPost]
     [ValidateAntiForgeryToken]
-    public async Task<IActionResult> DeleteConfirmed(
-        long id,
-        CancellationToken cancellationToken)
+    public async Task<IActionResult> DeleteConfirmed( long id, CancellationToken cancellationToken)
     {
         await _customerRepository.DeleteCustomerAsync( id,cancellationToken);
 

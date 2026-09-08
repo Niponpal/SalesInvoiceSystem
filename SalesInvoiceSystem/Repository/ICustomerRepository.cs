@@ -28,7 +28,7 @@ public class CustomerRepository : ICustomerRepository
     }
 
 
-    public async Task<Customer> AddCustomerAsync(  Customer customer,   CancellationToken cancellationToken)
+    public async Task<Customer> AddCustomerAsync( Customer customer, CancellationToken cancellationToken)
     {
         using var conn = _factory.CreateDbConnection();
 
@@ -87,9 +87,7 @@ public class CustomerRepository : ICustomerRepository
         return customer;
     }
 
-    public async Task<Customer> UpdateCustomerAsync(
-        Customer customer,
-        CancellationToken cancellationToken)
+    public async Task<Customer> UpdateCustomerAsync( Customer customer,CancellationToken cancellationToken)
     {
         using var conn = _factory.CreateDbConnection();
 
@@ -120,13 +118,10 @@ public class CustomerRepository : ICustomerRepository
     }
 
    
-    public async Task<Customer> DeleteCustomerAsync(
-        long id,
-        CancellationToken cancellationToken)
+    public async Task<Customer> DeleteCustomerAsync( long id, CancellationToken cancellationToken)
     {
         using var conn = _factory.CreateDbConnection();
 
-       
         var customerParameters = new DynamicParameters();
 
         customerParameters.Add("@Id", id);

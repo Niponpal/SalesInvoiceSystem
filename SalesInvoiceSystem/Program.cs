@@ -16,7 +16,6 @@ builder.Services.AddScoped<DbConnectionFactory>();
 
 // Product Repository
 builder.Services.AddScoped<IProductRepository, ProductRepository>();
-
 builder.Services.AddScoped<ICustomerRepository, CustomerRepository>();
 builder.Services.AddScoped<ISaleRepository, SaleRepository>();
 

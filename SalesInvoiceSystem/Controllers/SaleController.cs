@@ -65,9 +65,7 @@ namespace SalesInvoiceSystem.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> CreateOrEdit(
-            Sale sale,
-            CancellationToken cancellationToken)
+        public async Task<IActionResult> CreateOrEdit(Sale sale, CancellationToken cancellationToken)
         {
             await LoadDropdowns(cancellationToken);
 
@@ -186,9 +184,7 @@ namespace SalesInvoiceSystem.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> DeleteConfirmed(
-            int id,
-            CancellationToken cancellationToken)
+        public async Task<IActionResult> DeleteConfirmed( int id, CancellationToken cancellationToken)
         {
             if (id <= 0)
             {
