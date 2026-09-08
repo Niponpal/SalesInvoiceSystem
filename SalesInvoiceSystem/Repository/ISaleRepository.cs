@@ -33,7 +33,6 @@ public class SaleRepository : ISaleRepository
     {
         using var conn = _factory.CreateDbConnection();
 
-
         var parameters = new DynamicParameters();
         parameters.Add("@Id", id);
 
@@ -46,7 +45,6 @@ public class SaleRepository : ISaleRepository
 
         using var multi = await conn.QueryMultipleAsync(command);
 
-      
         var sale = await multi.ReadSingleOrDefaultAsync<Sale>();
 
         if (sale == null)

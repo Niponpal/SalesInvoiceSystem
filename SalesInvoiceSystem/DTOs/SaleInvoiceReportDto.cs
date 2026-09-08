@@ -20,5 +20,7 @@
         public decimal TotalPrice { get; set; }
 
         public decimal InvoiceTotal { get; set; }
+
+
     }
 }
