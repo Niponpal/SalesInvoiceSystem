@@ -41,6 +41,7 @@ public class ApplicationDbContext : DbContext
             .Property(x => x.TotalPrice)
             .HasPrecision(18, 2);
 
+
         // Customer -> Sales
         modelBuilder.Entity<Sale>()
             .HasOne(x => x.Customer)
